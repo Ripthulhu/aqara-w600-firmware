@@ -43,7 +43,8 @@ head.
 The **Package release OTA** workflow runs when a release is published. Create a
 draft release, attach exactly one `w600-controllerREVISION.bin` and its entry in
 `SHA256SUMS`, then publish. CI downloads the pinned stock 2848 donor, verifies
-both inputs, and attaches the `.ota`, packaging manifest, and OTA checksum.
+both inputs, and attaches the `.ota`, packaging manifest, OTA checksum, and
+single-file `w600_custom.mjs` converter.
 Existing assets must match; CI refuses to replace different files.
 
 To package an existing release, run the workflow manually with its release tag.

@@ -38,6 +38,8 @@ jobs:
         run: |
           python3 tools/test_package_ota.py
           python3 tools/test_package_release.py
+          python3 tools/test_bundle_converter.py
+          node --test zigbee2mqtt/test_w600_reference.mjs
       - name: Download release application and pinned stock donor
         shell: bash
         run: |

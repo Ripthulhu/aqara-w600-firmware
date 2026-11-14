@@ -11,9 +11,8 @@ GitHub Actions packages the OTA file and checks the firmware and stock donor.
 
 ## 2. Install the converter
 
-Install the [reference-status converter](../zigbee2mqtt/README.md) for your
-custom-firmware heads. It keeps lost calibration from appearing as a valid
-valve position.
+Add [w600_custom.mjs](../zigbee2mqtt/README.md) through Zigbee2MQTT's external-converter
+editor and save. It detects custom-firmware heads automatically.
 
 ## 3. Update
 

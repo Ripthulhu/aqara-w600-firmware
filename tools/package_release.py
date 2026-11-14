@@ -7,6 +7,7 @@ import subprocess
 import tempfile
 
 from package_ota import build_package, sha256, STREAM_PATH, write_new_or_identical
+from bundle_converter import bundle
 
 
 def prepare(inputs, stock, output):
@@ -32,6 +33,7 @@ def prepare(inputs, stock, output):
         name: package,
         name + '.json': (json.dumps(facts, indent=2) + '\n').encode(),
         name + '.sha256': (sha256(package) + '  ' + name + '\n').encode(),
+        'w600_custom.mjs': bundle(),
     }
     output.mkdir(parents=True, exist_ok=True)
     for name, body in contents.items():

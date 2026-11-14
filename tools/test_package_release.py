@@ -32,6 +32,8 @@ class ReleaseTests(unittest.TestCase):
         self.assertEqual(files[0].read_bytes(), b'ota')
         self.assertEqual(json.loads(files[1].read_text()), {'revision': 44})
         self.assertEqual(files[2].read_text(), release.sha256(b'ota') + '  w600-custom44.ota\n')
+        self.assertEqual(files[3].name, 'w600_custom.mjs')
+        self.assertIn(b'export default withReferenceState(native)', files[3].read_bytes())
         self.assertEqual(build.call_args.args[:3], (b'stock', b'application', 44))
 
     @patch.object(release, 'build_package')

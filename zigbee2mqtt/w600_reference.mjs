@@ -1,45 +1,27 @@
-// Custom firmware extension, not a stock W600 value. Requires validated radio forwarding.
+// Custom-controller marker, outside the normal valve-position range.
 export const UNKNOWN_POSITION = 6553.5;
-
 const POSITION_ATTRIBUTE = 0x0360;
 const CALIBRATION_ATTRIBUTE = 0x027b;
-const CALIBRATION_ERRORS = new Map([[2, 'error'], [3, 'in_progress']]);
 
-function listed(ieee, customDevices) {
-  return typeof ieee === 'string' && [...customDevices].some(
-    (device) => typeof device === 'string' && device.toLowerCase() === ieee.toLowerCase(),
-  );
-}
-
-export function normalizeReferenceState(ieee, rawData, converted, customDevices = []) {
-  if (!listed(ieee, customDevices)) return converted;
-  const calibration = CALIBRATION_ERRORS.get(rawData?.[CALIBRATION_ATTRIBUTE]);
-  if (calibration) {
-    return {...converted, position: null, calibrated: calibration, running_state: 'idle'};
-  }
-  if (rawData?.[POSITION_ATTRIBUTE] === UNKNOWN_POSITION) {
-    return {...converted, position: null, calibrated: 'not_ready', running_state: 'idle'};
-  }
-  return converted;
-}
-
-// Wrap every converter so a later native converter cannot restore stale fields in the same frame.
-export function withReferenceState(definition, customDevices = []) {
-  const devices = [...customDevices];
+export function withReferenceState(definition) {
   const references = new Map();
   const frames = new WeakMap();
   const corrections = (msg, meta) => {
     const ieee = (msg.device?.ieeeAddr ?? meta?.device?.ieeeAddr)?.toLowerCase();
-    if (!listed(ieee, devices)) return undefined;
+    if (!ieee) return undefined;
     if (frames.has(msg)) return frames.get(msg);
+    const raw = msg.cluster === 'manuSpecificLumi' ? msg.data ?? {} : {};
     if (!references.has(ieee)) {
       const retained = meta?.state;
+      // shortcut: install before OTA so the startup marker establishes custom firmware.
+      if (raw[POSITION_ATTRIBUTE] !== UNKNOWN_POSITION && retained?.w600_custom_firmware !== true) {
+        return undefined;
+      }
       const invalid = retained?.position === null &&
         ['not_ready', 'error', 'in_progress'].includes(retained.calibrated);
       references.set(ieee, invalid ? {status: retained.calibrated, progress: false} : null);
     }
     let reference = references.get(ieee);
-    const raw = msg.cluster === 'manuSpecificLumi' ? msg.data ?? {} : {};
     const calibration = raw[CALIBRATION_ATTRIBUTE];
     const report = msg.type === 'attributeReport';
     if (calibration === 2) {
@@ -74,6 +56,7 @@ export function withReferenceState(definition, customDevices = []) {
       }
     }
     references.set(ieee, reference);
+    result = {w600_custom_firmware: true, ...result};
     frames.set(msg, result);
     return result;
   };
