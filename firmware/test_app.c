@@ -66,7 +66,17 @@ int main(void)
         }
     }
     clear(); release(0); button_poll(100,4); button_poll(130,4);
-    assert(!(radio.endpoint.known&W600_KNOWN_TARGET) && !target_calls);
+    assert((radio.endpoint.known&W600_KNOWN_TARGET) && radio.endpoint.target_raw==2050 && target_calls==1);
+    assert(!radio.endpoint.mode && !radio.endpoint.control_enabled && !radio.endpoint.control_updates);
+    for (unsigned input=2;input<=4;input+=2) {
+        clear(); radio.endpoint=(struct w600_endpoint){.known=W600_KNOWN_TARGET,.target_raw=2150,
+            .mode_known=true,.control_error=W600_CONTROL_DRIVER,.calibration_error=5};
+        release(0); button_poll(100,(int)input); button_poll(130,(int)input);
+        assert(radio.endpoint.target_raw==(input==2 ? 2100 : 2200) && target_calls==1);
+        assert(!radio.endpoint.mode && !radio.endpoint.control_enabled && !radio.endpoint.control_updates);
+        assert(radio.endpoint.control_error==W600_CONTROL_DRIVER && radio.endpoint.calibration_error==5);
+        assert(!radio.endpoint.calibration_pending && !calls);
+    }
     clear(); radio.endpoint=(struct w600_endpoint){.control_enabled=true,.known=W600_KNOWN_TARGET,.target_raw=2000};
     release(0); button_poll(100,6); button_poll(130,6); button_poll(500,4);
     assert(radio.endpoint.target_raw==2000 && !target_calls && !calls);
@@ -76,7 +86,7 @@ int main(void)
 #ifdef W600_DISPLAY_BENCH
     struct w600_endpoint endpoint={0};
     uint8_t frame[4]={1,2,3,4}, expected[4]={0};
-    target_frame(&endpoint,frame); assert(!memcmp(frame,expected,4));
+    target_frame(&endpoint,frame); assert(frame[0]==4 && frame[1]==4 && !frame[2] && !frame[3]);
     endpoint.known=W600_KNOWN_TARGET;
     for (uint32_t raw=0;raw<=9990;++raw) {
         endpoint.target_raw=(uint16_t)raw;
@@ -85,15 +95,15 @@ int main(void)
     }
     for (uint32_t raw=9991;raw<=UINT16_MAX;++raw) {
         endpoint.target_raw=(uint16_t)raw; memset(expected,0,4);
-        target_frame(&endpoint,frame); assert(!memcmp(frame,expected,4));
+        target_frame(&endpoint,frame); assert(frame[0]==4 && frame[1]==4 && !frame[2] && !frame[3]);
     }
-    puts("PASS display target: unknown blank, all65536 raw targets, no invented position/status");
+    puts("PASS display target: unknown dashes, all65536 raw targets, no invented position/status");
     for (unsigned lock=0;lock<2;++lock) for (unsigned fault=0;fault<256;++fault) {
         endpoint=(struct w600_endpoint){.child_locked=lock!=0,.control_error=(uint8_t)fault};
         target_frame(&endpoint,frame);
         unsigned bits=(lock ? 0x10u : 0) |
             (fault>=W600_CONTROL_TEMPERATURE && fault<=W600_CONTROL_DRIVER ? 4u : 0);
-        assert(frame[0]==0 && frame[1]==0 && frame[2]==bits && frame[3]==0);
+        assert(frame[0]==4 && frame[1]==4 && frame[2]==bits && frame[3]==0);
         endpoint.calibration_error=1; target_frame(&endpoint,frame);
         assert(frame[2]==(bits|4u));
     }

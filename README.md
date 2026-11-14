@@ -11,7 +11,8 @@ bootloader are not replaced.
   detection, and a back-off and return.
 - Starts off after a restart, without moving the motor automatically.
 - Wakes the display when you turn the dial or press the button. Routine Zigbee
-  traffic leaves it dark.
+  traffic leaves it dark and does not extend the ten-second timeout.
+- Keeps dial adjustment available when a motor fault blocks movement.
 - Recovers from failed firmware transfers instead of staying stuck in update mode.
 - Marks the valve position as unknown when calibration is lost. Requires the
   supplied Zigbee2MQTT converter.

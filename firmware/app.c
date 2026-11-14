@@ -39,7 +39,10 @@ static void target_frame(const struct w600_endpoint *endpoint, uint8_t frame[4])
 {
     for (unsigned i=0;i<4;++i) frame[i]=0;
     frame[2]=display_status(endpoint);
-    if (!(endpoint->known&W600_KNOWN_TARGET) || endpoint->target_raw>9990u) return;
+    if (!(endpoint->known&W600_KNOWN_TARGET) || endpoint->target_raw>9990u) {
+        frame[0]=frame[1]=0x04u; /* Centre segment from the existing digit map. */
+        return;
+    }
     uint32_t raw=endpoint->target_raw, decic=0;
     /* Bounded by999 iterations, only when a changed target can be submitted. */
     while (raw>=10u) { raw-=10u; ++decic; }
@@ -90,12 +93,12 @@ static uint8_t button_poll(uint32_t now, int pressed_mask)
         ++app_report.pairing_attempts;
         app_report.pairing_request_accepted=(uint32_t)w600_radio_request_pairing(&radio,now);
     }
-    if (e->child_locked || !e->control_enabled || !(e->known&W600_KNOWN_TARGET) ||
-        e->target_raw<500u || e->target_raw>3000u) return events;
-    uint16_t target=e->target_raw;
+    if (e->child_locked || !(events&6u)) return events;
+    bool known=(e->known&W600_KNOWN_TARGET) && e->target_raw>=500u && e->target_raw<=3000u;
+    uint16_t target=known ? e->target_raw : 2000u;
     if ((events&6u)==W600_BUTTON_DECREASE) target=target<=550u ? 500u : (uint16_t)(target-50u);
     if ((events&6u)==W600_BUTTON_INCREASE) target=target>=2950u ? 3000u : (uint16_t)(target+50u);
-    if (target!=e->target_raw && w600_endpoint_set_target(e,target))
+    if ((!known || target!=e->target_raw) && w600_endpoint_set_target(e,target))
         (void)w600_radio_report_target(&radio);
     return events;
 }
@@ -117,8 +120,8 @@ static int display_poll(uint32_t now,uint8_t events)
     if (!w600_display_tx_poll(&display,now)) return 0;
     if (before!=W600_DISPLAY_TX_IDLE && display.phase==W600_DISPLAY_TX_IDLE)
         ++display_completed;
-    uint32_t target=(radio.endpoint.known&W600_KNOWN_TARGET) ?
-        radio.endpoint.target_raw : 0x10000u;
+    uint32_t target=(radio.endpoint.known&W600_KNOWN_TARGET) && radio.endpoint.target_raw<=9990u ?
+        radio.endpoint.target_raw : 0x10001u;
     bool visible=display_should_show(now,events);
     if (!visible) target=0x10000u;
     uint8_t status=visible ? display_status(&radio.endpoint) : 0;

@@ -29,6 +29,7 @@ for name, sources in (
     CASES.append((C+'test_'+name+'.c', [C+p for p in sources], []))
 CASES += [
     (F+'test_app.c', [C+'w600_buttons.c', C+'w600_endpoint.c'], []),
+    (F+'test_app.c', [C+'w600_display.c', C+'w600_buttons.c', C+'w600_endpoint.c'], ['-DW600_DISPLAY_BENCH=1']),
     (F+'test_controller_revision.c', [C+'w600_endpoint.c'], []),
     (F+'test_display_tx.c', [F+'display_tx.c'], ['-DW600_DISPLAY_TX_TEST=1']),
     (F+'test_ota_auth.c', [F+'ota_auth.c'], ['-DW600_OTA_AUTH_TEST=1']),
