@@ -8,6 +8,7 @@ from unittest.mock import patch
 import zlib
 
 import package_ota as ota
+from test_ota_image import image as sealed_image
 
 
 class PackageTests(unittest.TestCase):
@@ -58,6 +59,15 @@ class PackageTests(unittest.TestCase):
         for changes in ({'stock': self.stock[:-1]}, {'stream': self.stream[:-1]}, {'stream': bytes(52720)}):
             with self.subTest(changes=list(changes)), self.assertRaises(ValueError):
                 self.build(**changes)
+
+    def test_follow_up_image_is_verified_not_resealed(self):
+        image=sealed_image(47)
+        package,facts=self.build(image=image,revision=47)
+        _,parts=ota.parse_ota(package)
+        self.assertEqual(ota.xor(parts[-1][2][128:],self.stream[:len(image)]),image)
+        for data in (self.image,image[:-4],image[:-1]+bytes((image[-1]^1,))):
+            with self.assertRaises(ValueError):self.build(image=data,revision=47)
+        with self.assertRaises(ValueError):self.build(image=image,revision=48)
 
     def test_invalid_revision_lengths_and_vectors(self):
         for revision in (0, 28, 256, -1, True, 44.5):

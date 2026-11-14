@@ -16,9 +16,6 @@
 #ifdef W600_OTA_RECEIVER
 #include "ota_flash.h"
 #include "ota_auth.h"
-#ifdef W600_OTA_PINNED_BUILD
-#include "ota_pin.h"
-#endif
 #endif
 #endif
 #endif
@@ -243,15 +240,8 @@ static bool ota_stage_write(void *context,uint32_t address,const uint32_t page[1
 }
 static bool ota_authorize(void *context,uint32_t address,uint32_t length,uint32_t revision)
 {
-#ifdef W600_OTA_PINNED_BUILD
-    static const struct w600_ota_authorization target={W600_OTA_PIN_LENGTH,
-        W600_OTA_PIN_REVISION,{W600_OTA_PIN_DIGEST}};
-    return w600_ota_authorize_image(&target,ota_stage_read,context,address,length,revision);
-#else
-    (void)context;(void)address;(void)length;(void)revision;
-    /* shortcut: receiving/staging only until custom-image authentication is qualified. */
-    return false;
-#endif
+    return w600_ota_authorize_image(ota_stage_read,context,address,length,revision,
+                                    W600_CONTROLLER_REVISION,ota.page);
 }
 static bool ota_commit(void *context,uint32_t length,uint16_t crc,uint32_t revision)
 {
@@ -537,13 +527,7 @@ void w600_app_main(void)
     if (!w600_valve_calibration_init(&valve,&motor,&radio.endpoint)) fatal(13,0);
     if (!w600_settings_app_init(&radio.endpoint,&app_ticks)) fatal(15,0);
 #ifdef W600_OTA_RECEIVER
-    if(!w600_ota_flash_init(&app_ticks,
-#ifdef W600_OTA_PINNED_BUILD
-        ota_authorize,
-#else
-        NULL,
-#endif
-        NULL))fatal(18,0);
+    if(!w600_ota_flash_init(&app_ticks,ota_authorize,NULL))fatal(18,0);
     w600_ota_init(&ota,&ota_ops,NULL);radio.ota=&ota;
     radio.reply=(struct w600_frame){.sequence=radio.next_sequence++,.kind=5,.length=5,
         .payload={0x20,2,3,(uint8_t)(W600_CONTROLLER_REVISION>>8),(uint8_t)W600_CONTROLLER_REVISION}};
@@ -701,8 +685,6 @@ void w600_app_main(void)
         }
 #ifdef W600_OTA_RECEIVER
         ota_failed_restart(now,false);
-#endif
-#ifdef W600_OTA_PINNED_BUILD
         if(ota.state==W600_OTA_COMMITTED) {
             if(!ota_quiesce(NULL))fatal(19,0);
             __disable_irq();NVIC_SystemReset();

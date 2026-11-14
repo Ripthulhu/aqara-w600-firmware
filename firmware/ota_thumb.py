@@ -1,7 +1,7 @@
 """Actual linked OTA receive/staging paths on the existing narrow FLASH bus.
 
-No device access. Production authorization must deny commit; this does not
-qualify radio-package acceptance, power-cut installation or silicon timing.
+No device access. Invalid images must be denied; a valid synthetic image must
+reach marker-last activation and restart. This is not a radio/silicon test.
 """
 import binascii
 from concurrent.futures import ProcessPoolExecutor, as_completed
@@ -12,6 +12,7 @@ import re
 import struct
 import subprocess
 import sys
+from ota_image import MAGIC,seal
 
 import settings_thumb as settings
 
@@ -23,7 +24,7 @@ STAGE=0x08010800
 STAGE_END=STAGE+0xce00
 MARKER=0x08001e00
 SCENARIOS=('receive_auth_denied','traffic','power_cut','bad_header','duplicate',
-           'timeout','busy_reject','display_timeout','radio_abort','uncertain_marker','failure_transport')
+           'timeout','busy_reject','display_timeout','radio_abort','uncertain_marker','failure_transport','receive_valid')
 
 
 def parse_ota_fields(text):
@@ -216,8 +217,40 @@ class OtaCore(settings.SettingsCore):
                       worker_entry_msp=[hex(x) for x in self.worker_msp],
                       ota_owned=bool(self.get(self.symbols['ota_owned'])&255),
                       activation_marker_armed=False,protected_flash_unchanged=True,
-                      production_authorization_enabled=False)
+                      production_authorization_enabled=True)
         return result
+
+
+class SuccessfulOtaCore(OtaCore):
+    def __init__(self,*args,**kwargs):
+        self.commit_pages=[]
+        super().__init__(*args,**kwargs)
+
+    def write(self,cpu,access,address,size,value,user):
+        pages=(MARKER,0x0801fc00,0x0801fe00)
+        if address==0xe000ed0c:
+            assert size==4 and value>>16==0x05fa and value&4
+            assert not self.in_handler and cpu.reg_read(base.UC_ARM_REG_PRIMASK)==1
+            assert self.off() and self.selectors_low() and self.busy_until is None
+            assert self.commit_pages==[0x0801fc00,0x0801fe00,MARKER]
+            assert bytes(cpu.mem_read(MARKER,512))==struct.pack('<I',0x67890123)+b'\xff'*508
+            self.reset_requested_at=self.virtual_us;self.reason='reset';cpu.emu_stop();return
+        if address==FP+0x14:
+            target=0x08000000+((value>>8)&511)*512
+            if target in pages and value&0xff in (2,10):
+                assert self.busy_until is None and size==4 and self.off() and self.selectors_low()
+                assert value==(0x40000000|((target-0x08000000)//512<<8)|(value&0xff))
+                if value&8:
+                    self.commit_pages.append(target)
+                    self.cpu.mem_write(target,b'\xff'*512)
+                    self.erases+=1;self.busy_until=self.virtual_us+2500;self.put(FP+0x10,0x10000)
+                return
+        if any(p<=address<p+512 for p in pages):
+            assert size==4 and not address&3 and self.busy_until is None
+            assert self.get(FP+0x14)==0x40000001 and self.get(address)&value==value
+            assert self.off() and self.selectors_low()
+            self.stores+=1;self.busy_until=self.virtual_us+50;self.put(FP+0x10,0x10000);return
+        super().write(cpu,access,address,size,value,user)
 
 
 def until(m,predicate,limit=24000):
@@ -322,10 +355,11 @@ def recover_failure(m,data,symbols,transport_failure=False):
 
 def run(data,symbols,name,ota_layout):
     assert name in SCENARIOS
-    m=OtaCore(data,symbols,name)
+    m=(SuccessfulOtaCore if name=='receive_valid' else OtaCore)(data,symbols,name)
     m.boot()
     until(m,lambda:m.virtual_us>=1800000 and m.display_report()[2]==0)
     assert m.off() and not m.timer_runs and not m.erases
+    assert m.get(symbols['authorize'])==symbols['ota_authorize']|1,'OTA backend policy not connected'
     if name=='busy_reject':
         m.put(symbols['mounting_report'],0xa7)
         until(m,lambda:len(m.timer_runs)==1 and not m.off())
@@ -352,6 +386,34 @@ def run(data,symbols,name,ota_layout):
         m.direction_buttons=0;m.levels(service.PB)
         until(m,lambda:m.virtual_us>=1900000 and m.display_report()[2]==0)
     index,request=start(m)
+    if name=='receive_valid':
+        revision=m.get(symbols['w600_ota_identity']+20)+1
+        image,header=image_and_header();image=bytearray(image)
+        image[-64:]=struct.pack('<16s4I32s',MAGIC,1,revision,0,1,bytes(32))
+        image=seal(image,revision);header=bytearray(header)
+        struct.pack_into('<III',header,32,len(image),binascii.crc_hqx(image,0),revision)
+        struct.pack_into('<I',header,124,binascii.crc_hqx(header[:124],0))
+        respond(m,request,header)
+        while True:
+            index,request=wait_frame(m,lambda f:f.kind==6 and f.payload[0]==0x40,index+1)
+            if request.payload[:2]==bytes.fromhex('4002'):break
+            assert request.payload[:2]==bytes.fromhex('4001'),request
+            offset=int.from_bytes(request.payload[5:9],'big')-128;n=request.payload[10]
+            respond(m,request,image[offset:offset+n])
+        assert m.commit_pages==[] and not m.timer_runs
+        packet(m,base.Frame(request.sequence,7,bytes.fromhex('40020007')+struct.pack('>I',100)))
+        until(m,lambda:m.reset_requested_at is not None)
+        after=bytes(m.cpu.mem_read(0x08000000,0x20000))
+        assert after[:0x1e00]==m.flash[:0x1e00] and after[0x2000:0x10800]==m.flash[0x2000:0x10800]
+        assert after[0x1d600:0x1fc00]==m.flash[0x1d600:0x1fc00]
+        assert after[STAGE-0x08000000:STAGE-0x08000000+len(image)]==image
+        assert after[0x1fc00:0x1fe00]==after[0x1fe00:]
+        descriptor=struct.unpack_from('<5I',after,0x1fc00)
+        assert descriptor[:3]==(0,STAGE,len(image)) and descriptor[3]&0xffff==binascii.crc_hqx(image,0)
+        assert descriptor[4]>>16==binascii.crc_hqx(after[0x1fc00:0x1fc12],0)
+        return dict(valid_update_accepted=True,activation_order=[hex(p) for p in m.commit_pages],
+                    compiled_application_requested_restart=True,active_image_unchanged_until_bootloader=True,
+                    target_revision=revision,motor_runs=m.timer_runs,hardware_tested=False)
     if name in ('bad_header','uncertain_marker','failure_transport'):
         if name=='uncertain_marker':
             m.cpu.mem_write(MARKER+508,b'\x00')

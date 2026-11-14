@@ -3,6 +3,10 @@
 For a CIU32L071 W600 running stock **0.0.0_2848** (controller 28 / radio 48).
 The firmware is experimental; keep SWD recovery available.
 
+Controller46 and later can use the same procedure for subsequent updates.
+Controllers43–45 require one wired update first: their installed update check
+rejects all follow-up images. Sending a different OTA package cannot change it.
+
 ## 1. Download
 
 Download `w600-custom44.ota` and its `.sha256` file from the

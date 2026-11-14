@@ -9,9 +9,9 @@ static struct {
     uint32_t length;
     unsigned calls,fail_read;
     bool reenter;
-    const struct w600_ota_authorization *target;
 } source;
 static unsigned cases;
+static uint32_t scratch[W600_OTA_AUTH_WORDS];
 
 static bool read_stage(void *context,uint32_t address,void *out,size_t length)
 {
@@ -20,8 +20,7 @@ static bool read_stage(void *context,uint32_t address,void *out,size_t length)
     ++source.calls;
     if(source.fail_read==source.calls)return false;
     if(source.reenter && source.calls==1)
-        assert(!w600_ota_authorize_image(source.target,read_stage,&source,STAGE,
-                                         source.length,30));
+        assert(!w600_ota_authorize_image(read_stage,&source,STAGE,source.length,47,46,scratch));
     memcpy(out,source.data+address-STAGE,length);return true;
 }
 static void digest(uint8_t out[32],const char *hex)
@@ -46,10 +45,19 @@ static void vector(const char *text,const char *expected)
     assert(!memcmp(calculated,known,32));
     assert(source.calls==(source.length+63u)/64u);
 }
-static bool authorize(const struct w600_ota_authorization *target,uint32_t length,uint32_t revision)
+static bool authorize(uint32_t length,uint32_t revision,uint32_t current)
 {
     ++cases;source.calls=0;
-    return w600_ota_authorize_image(target,read_stage,&source,STAGE,length,revision);
+    return w600_ota_authorize_image(read_stage,&source,STAGE,length,revision,current,scratch);
+}
+static void seal(uint32_t length,uint32_t revision)
+{
+    source.length=length;
+    for(unsigned i=0;i<length;++i)source.data[i]=(uint8_t)i;
+    const uint32_t identity[8]={0x30303657,0x5549432d,0x4f2d3233,0x00314154,1,revision,length,1};
+    memcpy(source.data+length-64,identity,32);
+    source.calls=0;
+    assert(w600_ota_auth_test_sha256(read_stage,&source,STAGE,length-32,source.data+length-32));
 }
 int main(void)
 {
@@ -63,45 +71,41 @@ int main(void)
     vector("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
            "ffe054fe7ae0cb6dc65c3af9b61d5209f439851db43d0ba5997337df154668eb");
 
-    source.length=256;
-    for(unsigned i=0;i<256;++i)source.data[i]=(uint8_t)i;
-    struct w600_ota_authorization target={.length=256,.revision=30};
-    digest(target.digest,"40aff2e9d2d8922e47afd4648e6967497158785fbd1da870e7110266bf944880");
-    assert(authorize(&target,256,30) && source.calls==4);
-    assert(!authorize(NULL,256,30) && !source.calls);
-    assert(!authorize(&target,252,30) && !source.calls);
-    assert(!authorize(&target,256,29) && !source.calls);
-    assert(!w600_ota_authorize_image(&target,NULL,&source,STAGE,256,30));
-    assert(!w600_ota_authorize_image(&target,read_stage,&source,STAGE+4,256,30));
-    for(unsigned i=0;i<32;++i) {
-        target.digest[i]^=1;
-        assert(!authorize(&target,256,30) && source.calls==4);
-        target.digest[i]^=1;
+    seal(256,47);
+    assert(authorize(256,47,46) && source.calls==5);
+    assert(!authorize(252,47,46) && !source.calls);
+    for(unsigned revision=0;revision<=256;++revision) {
+        if(revision==47)continue;
+        assert(!authorize(256,revision,46));
     }
-    source.data[200]^=1;assert(!authorize(&target,256,30));source.data[200]^=1;
-    for(unsigned fail=1;fail<=4;++fail) {
+    assert(!authorize(256,47,47) && !source.calls);
+    assert(!authorize(256,47,48) && !source.calls);
+    assert(!authorize(256,47,0) && !source.calls);
+    assert(!w600_ota_authorize_image(NULL,&source,STAGE,256,47,46,scratch));
+    assert(!w600_ota_authorize_image(read_stage,&source,STAGE+4,256,47,46,scratch));
+    assert(!w600_ota_authorize_image(read_stage,&source,STAGE,256,47,46,NULL));
+    for(unsigned i=0;i<256;++i) {
+        source.data[i]^=1;
+        assert(!authorize(256,47,46));
+        source.data[i]^=1;
+    }
+    for(unsigned fail=1;fail<=5;++fail) {
         source.fail_read=fail;
-        assert(!authorize(&target,256,30) && source.calls==fail);
-        source.fail_read=0;assert(authorize(&target,256,30) && source.calls==4);
+        assert(!authorize(256,47,46) && source.calls==fail);
+        source.fail_read=0;assert(authorize(256,47,46) && source.calls==5);
     }
-    source.reenter=true;source.target=&target;
-    assert(authorize(&target,256,30) && source.calls==4);
+    source.reenter=true;
+    assert(authorize(256,47,46) && source.calls==5);
     source.reenter=false;
-    struct w600_ota_authorization missing={0};
-    assert(!authorize(&missing,0,0) && !source.calls);
     for(unsigned i=0;i<4;++i) {
-        uint32_t length=(uint32_t[]){188,193,MAX_IMAGE+4,UINT32_MAX}[i];
-        target.length=length;
-        assert(!authorize(&target,length,30) && !source.calls);
+        uint32_t length=(uint32_t[]){252,257,MAX_IMAGE+4,UINT32_MAX}[i];
+        assert(!authorize(length,47,46) && !source.calls);
     }
-    source.length=MAX_IMAGE;
-    for(unsigned i=0;i<MAX_IMAGE;++i)source.data[i]=(uint8_t)i;
-    target.length=MAX_IMAGE;
-    assert(w600_ota_auth_test_sha256(read_stage,&source,STAGE,MAX_IMAGE,target.digest));
-    assert(authorize(&target,MAX_IMAGE,30) && source.calls==MAX_IMAGE/64);
-    assert(!w600_ota_auth_test_sha256(NULL,&source,STAGE,0,target.digest));
+    seal(52720,255);assert(authorize(52720,255,254));
+    uint8_t sum[32];
+    assert(!w600_ota_auth_test_sha256(NULL,&source,STAGE,0,sum));
     assert(!w600_ota_auth_test_sha256(read_stage,&source,STAGE,0,NULL));
-    assert(!w600_ota_auth_test_sha256(read_stage,&source,UINT32_MAX,4,target.digest));
-    printf("OTA authorization: %u hash/pin/fault fixtures passed\n",cases);
+    assert(!w600_ota_auth_test_sha256(read_stage,&source,UINT32_MAX,4,sum));
+    printf("OTA policy: %u identity/version/integrity/fault fixtures passed\n",cases);
     return 0;
 }

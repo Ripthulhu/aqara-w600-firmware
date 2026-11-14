@@ -14,6 +14,7 @@ bootloader are not replaced.
   traffic leaves it dark and does not extend the ten-second timeout.
 - Keeps dial adjustment available when a motor fault blocks movement.
 - Recovers from failed firmware transfers instead of staying stuck in update mode.
+- Supports further OTA updates without hard-coding the next image (controller46+).
 - Marks the valve position as unknown when calibration is lost. Requires the
   supplied Zigbee2MQTT converter.
 

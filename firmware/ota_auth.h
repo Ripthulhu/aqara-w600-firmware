@@ -4,17 +4,14 @@
 #include <stddef.h>
 #include <stdint.h>
 
-struct w600_ota_authorization {
-    uint32_t length,revision;
-    uint8_t digest[32];
-};
+enum { W600_OTA_AUTH_WORDS=56, W600_OTA_IDENTITY_BYTES=64 };
 typedef bool (*w600_ota_stage_reader)(void *,uint32_t address,void *out,size_t length);
-/* Single pinned image only. Caller supplies a compile-time target configuration
- * and owns immutable staging flash throughout this serialized foreground call.
- * NULL configuration denies all images; this is not a signature trust store. */
-bool w600_ota_authorize_image(const struct w600_ota_authorization *,
-                             w600_ota_stage_reader,void *context,uint32_t stage,
-                             uint32_t length,uint32_t revision);
+/* Updates trust the paired Zigbee network, not a signing key. Verify a newer
+ * W600 image, retained OTA capability and SHA256 before activation. The digest
+ * detects corruption; it is not a signature. Caller owns staging and scratch. */
+bool w600_ota_authorize_image(w600_ota_stage_reader,void *context,uint32_t stage,
+                             uint32_t length,uint32_t revision,uint32_t current_revision,
+                             uint32_t scratch[W600_OTA_AUTH_WORDS]);
 #ifdef W600_OTA_AUTH_TEST
 bool w600_ota_auth_test_sha256(w600_ota_stage_reader,void *,uint32_t address,
                               uint32_t length,uint8_t digest[32]);

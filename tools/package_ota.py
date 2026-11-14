@@ -6,6 +6,9 @@ import json
 from pathlib import Path
 import struct
 import zlib
+import sys
+sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'firmware'))
+from ota_image import validate as validate_update_image
 
 STOCK_SHA256 = '9929022f8755a23099efac929250284580296472d5fb98adf4513b5861d76d4d'
 STREAM_SHA256 = '60fb2b4b475ed3eacecfa84e569d3d736bbe4f4ec61693fe490ff604227c192f'
@@ -52,6 +55,8 @@ def build_package(stock, image, revision, stream):
         raise ValueError('Controller revision must be an integer from 29 to 255')
     if not 192 <= len(image) <= STREAM_BYTES or len(image) % 4:
         raise ValueError('Application must contain 192..52720 bytes, aligned to four bytes')
+    if revision>=46:
+        validate_update_image(image,revision)
     sp, entry = struct.unpack_from('<II', image)
     if sp % 8 or not 0x20000008 <= sp <= 0x20007000 or not entry & 1 or not 0x08002000 <= (entry & ~1) < 0x08002000 + len(image):
         raise ValueError('Application vectors do not fit the CIU32 application region')

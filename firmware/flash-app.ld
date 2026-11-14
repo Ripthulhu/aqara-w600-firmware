@@ -22,6 +22,7 @@ SECTIONS {
  } >DATA AT>CODE
  __data_load = LOADADDR(.data);
  __data_size = SIZEOF(.data);
+ .ota_identity : { KEEP(*(.ota_identity)) } >CODE
  .bss (NOLOAD) : {
   __bss_start = .; *(.bss*) *(COMMON) __bss_end = .;
  } >DATA
@@ -34,6 +35,8 @@ ASSERT(ADDR(.vectors)==0x08002000 && SIZEOF(.vectors)==192,"Application vectors"
 ASSERT(__data_end<=__bss_start && __bss_end<=0x20006000,"RAM overlaps settings worker")
 ASSERT(__nvcode_start==0x20006000 && __nvcode_end<=0x20006980,"Settings worker overlaps reports")
 ASSERT(__data_load+__data_size<=0x0800ee00,"Application crosses active-image boundary")
+ASSERT(SIZEOF(.ota_identity)==64 && ADDR(.ota_identity)>=__data_load+__data_size &&
+       ADDR(.ota_identity)+64<=0x08002000+52720,"OTA identity/image limit")
 ASSERT(__data_load+__data_size<=__settings_page0 &&
        (__settings_page0&511)==0 && __settings_page1==__settings_page0+512 &&
        __settings_page1+512<=0x08010800,"Settings pages overlap code/staging")

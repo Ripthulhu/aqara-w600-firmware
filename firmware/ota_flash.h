@@ -8,8 +8,8 @@
 #define W600_OTA_FLASH_IMAGE_MAX 0xce00u
 #define W600_OTA_FLASH_STAGE_END (W600_OTA_FLASH_STAGE+W600_OTA_FLASH_IMAGE_MAX)
 
-/* Must independently hash the staged bytes against an explicitly authorized
- * candidate/signature policy. CRC/revision equality alone is not authorization. */
+/* Must independently validate the staged image against the update policy.
+ * The application policy trusts the paired network and checks identity/SHA256. */
 typedef bool (*w600_ota_authorize)(void *,uint32_t stage,uint32_t length,uint32_t revision);
 bool w600_ota_flash_init(const volatile uint32_t *ticks,w600_ota_authorize,void *context);
 /* One-way ownership transfer of two aligned SRAM pages from settings. Caller

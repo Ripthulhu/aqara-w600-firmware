@@ -19,16 +19,12 @@ parser.add_argument("--display-probe-bench",action="store_true")
 parser.add_argument("--motor-service-bench",action="store_true")
 parser.add_argument("--flash-application",action="store_true")
 parser.add_argument("--development-link-only",action="store_true",help="Compile/test/link a FLASH development image; leave runtime qualification pending")
-parser.add_argument("--controller-revision",type=int,default=28)
-parser.add_argument("--ota-allow-image",type=Path)
-parser.add_argument("--ota-allow-revision",type=int)
+parser.add_argument("--controller-revision",type=int,default=46)
 parser.add_argument("--motor-direction",type=int,choices=(1,2),default=2)
 args=parser.parse_args()
 flash=args.flash_application
 if not 1<=args.controller_revision<=65535:parser.error("Controller revision outside BE16 range")
-if bool(args.ota_allow_image)!=bool(args.ota_allow_revision):parser.error("OTA image and revision must be specified together")
-if args.ota_allow_image and (not flash or not args.controller_revision<args.ota_allow_revision<=65535):
-    parser.error("Pinned OTA requires a newer explicit controller revision and FLASH build")
+if flash and not 46<=args.controller_revision<=255:parser.error("OTA-enabled application revision must be46..255")
 if args.development_link_only and not flash:parser.error("Development link-only requires --flash-application")
 service=args.motor_service_bench or flash
 if flash and (args.raw_probe_bench or args.display_probe_bench or args.motor_service_bench):
@@ -39,18 +35,6 @@ display=args.display_probe_bench or service
 probe=args.raw_probe_bench or args.display_probe_bench
 OUT=Path(os.environ.get("W600_BUILD_DIR",str(ROOT/("build-application" if flash else "build-service" if service else "build-display" if display else "build-probe" if probe else "build-stop"))))
 OUT.mkdir(exist_ok=True)
-ota_pin=None
-if args.ota_allow_image:
-    allowed=args.ota_allow_image.read_bytes()
-    if not 192<=len(allowed)<=0xce00 or len(allowed)&3:parser.error("Pinned image length invalid")
-    sp,entry=struct.unpack_from('<II',allowed)
-    if sp&7 or not 0x20000008<=sp<=0x20007000 or not entry&1 or not 0x08002000<=(entry&~1)<0x08002000+len(allowed):
-        parser.error("Pinned image vectors invalid")
-    digest=hashlib.sha256(allowed).digest()
-    ota_pin={'length':len(allowed),'revision':args.ota_allow_revision,'sha256':digest.hex()}
-    (OUT/'ota_pin.h').write_text('#define W600_OTA_PIN_LENGTH '+str(len(allowed))+'u\n'+
-        '#define W600_OTA_PIN_REVISION '+str(args.ota_allow_revision)+'u\n'+
-        '#define W600_OTA_PIN_DIGEST '+','.join('0x%02x'%b for b in digest)+'\n')
 SDK=Path(os.environ.get("CIU32_SDK","/srv/ai-agent/work/aqara-w600-hardware/sdk-build/vendor-sdk/CIU32L071 EclipseExampleProject"))
 PREFIX=os.environ.get("ARM_TOOL_PREFIX","arm-none-eabi-")
 warnings=["-std=gnu11","-Wall","-Wextra","-Werror"]
@@ -88,6 +72,8 @@ if service:
 if flash:
     tests.append((ROOT/"test_ota_auth.c",[ROOT/"ota_auth.c"],["-DW600_OTA_AUTH_TEST=1"]))
     tests.append((ROOT/"test_ota_receiver.c",[ROOT/"ota_receiver.c"],[]))
+    tests.append((ROOT/"test_ota_chain.c",[ROOT/"ota_receiver.c",ROOT/"ota_auth.c",ROOT/"ota_flash.c"],
+                  ["-DW600_OTA_AUTH_TEST=1","-DW600_OTA_FLASH_TEST=1"]))
     tests.append((ROOT/"test_ota_flash.c",[ROOT/"ota_flash.c"],["-DW600_OTA_FLASH_TEST=1"]))
     tests.append((ROOT/"test_radio.c",[ROOT/"radio.c",ROOT/"ota_receiver.c",control/"w600_frame.c",
                   control/"w600_endpoint.c",control/"w600_pairing.c"],
@@ -151,7 +137,6 @@ if service: flags.append("-DW600_MOTOR_SERVICE=1")
 if args.motor_service_bench: flags += ["-DW600_MOTOR_SERVICE_BENCH=1","-DW600_MOTOR_DIRECTION="+str(args.motor_direction)]
 if flash: flags += ["-DW600_FLASH_APPLICATION=1","-DW600_OTA_RECEIVER=1"]
 flags += ["-DW600_CONTROLLER_REVISION="+str(args.controller_revision)]
-if ota_pin:flags += ["-DW600_OTA_PINNED_BUILD=1","-I",str(OUT.resolve())]
 objects=[]
 for unit in units:
     obj=OUT/(unit.stem+".o")
@@ -192,6 +177,14 @@ for line in subprocess.check_output([PREFIX+"nm","-n",str(elf)],text=True).split
     if m: symbols[m[2]]=int(m[1],16)
 binary=OUT/"replacement-core.bin"
 subprocess.check_call([PREFIX+"objcopy","-O","binary",str(elf),str(binary)])
+if flash:
+    from ota_image import seal
+    sealed=seal(binary.read_bytes(),args.controller_revision)
+    identity=OUT/'ota-identity.bin'
+    identity.write_bytes(sealed[-64:])
+    subprocess.check_call([PREFIX+'objcopy','--update-section','.ota_identity='+str(identity),str(elf)])
+    subprocess.check_call([PREFIX+'objcopy','-O','binary',str(elf),str(binary)])
+    assert binary.read_bytes()==sealed
 data=binary.read_bytes()
 vectors=struct.unpack_from("<48I",data)
 assert vectors[0]==0x20007000 and vectors[1]==symbols["W600_Reset_Handler"]|1
@@ -269,12 +262,12 @@ if service:
             "w600_ota_process":["ota_quiesce","ota_stage_write"],"w600_ota_poll":["ota_commit"],
             "w600_ota_flash_commit":["ota_authorize"]})
         indirect_targets["stop"].append("calibration_stop")
-        if ota_pin:indirect_targets['w600_ota_authorize_image']=['ota_stage_read']
+        indirect_targets['w600_ota_authorize_image']=['ota_stage_read']
     assert set(indirect)==set(indirect_targets),(indirect,indirect_targets)
     expected_indirect={"stop":1}
     if flash:expected_indirect.update({"verify":4,"w600_ota_process":3,"w600_ota_poll":1,
         "w600_ota_flash_commit":2,"read_pages":2,"w600_settings_save":1})
-    if ota_pin:expected_indirect['w600_ota_authorize_image']=2
+    if flash:expected_indirect['w600_ota_authorize_image']=2
     assert {name:indirect.count(name) for name in set(indirect)}==expected_indirect,indirect
     for caller,callees in indirect_targets.items():
         for callee in callees: edges[caller].add(callee)
@@ -356,7 +349,7 @@ if service:
                control/"motor_homing.h",control/"motor_guard.h",
                control/"motor_calibration.h",control/"motor_position.h",control/"motor_slowdown.h",control/"test_motor_slowdown.c",
                ROOT.parent/"startup/w600_feedback.h",ROOT.parent/"startup/w600_feedback_board.h"]
-if flash: inputs += [ROOT/"ota_auth.h",ROOT/"ota_receiver.h",ROOT/"ota_flash.h",ROOT/"vbat_adc.h",ROOT/"stop_mode.h",ROOT/"test_stop_mode_thumb.py",ROOT/"sleep_clock.h",ROOT/"test_sleep_clock_thumb.py",ROOT/"test_sleep_cancel_thumb.py",ROOT/"settings_flash.h",ROOT/"settings_app.h",ROOT/"settings_thumb.py",ROOT/'verify_settings_flash_regs.c',ROOT.parent/"flash-page/flash_regs.h",ROOT/"application_thumb.py",ROOT/"valve_calibration.h",ROOT/"test_display_idle_thumb.py",
+if flash: inputs += [ROOT/"ota_auth.h",ROOT/"ota_image.py",ROOT/"ota_receiver.h",ROOT/"ota_flash.h",ROOT/"vbat_adc.h",ROOT/"stop_mode.h",ROOT/"test_stop_mode_thumb.py",ROOT/"sleep_clock.h",ROOT/"test_sleep_clock_thumb.py",ROOT/"test_sleep_cancel_thumb.py",ROOT/"settings_flash.h",ROOT/"settings_app.h",ROOT/"settings_thumb.py",ROOT/'verify_settings_flash_regs.c',ROOT.parent/"flash-page/flash_regs.h",ROOT/"application_thumb.py",ROOT/"valve_calibration.h",ROOT/"test_display_idle_thumb.py",
     control/"test_motor_confirmation.c",
     control/"motor_calibration.h",control/"motor_position.h",control/"motor_slowdown.h",ROOT/"control_thumb.py",
     ROOT/"test_control_layout.c",ROOT/"test_motor_service_thumb.py",ROOT/"sampling_stress.py",
@@ -371,8 +364,8 @@ manifest={"kind":"persistent application development image, normal controls inco
           "linked_service_model_pending":service,
           "development_link_only":args.development_link_only,
           "settings_flash_worker_linked":flash,"settings_storage_enabled":flash,
-          "ota_receiver_enabled":flash,"ota_commit_authorization_enabled":bool(ota_pin),
-          "controller_revision":args.controller_revision,"ota_pinned_target":ota_pin,
+          "ota_receiver_enabled":flash,"ota_commit_authorization_enabled":flash,
+          "controller_revision":args.controller_revision,"ota_update_policy":"paired Zigbee network; newer W600 image with retained OTA capability and SHA256 integrity" if flash else None,
           "ota_radio_package_acceptance_validated":False,"ota_hardware_validated":False,
           "settings_worker_stack_bound_bytes":nv_stack,
           "raw_probe_bench":probe,"radio_controlled_motion_enabled":flash,

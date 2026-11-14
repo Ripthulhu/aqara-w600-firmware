@@ -35,6 +35,7 @@ CASES += [
     (F+'test_ota_auth.c', [F+'ota_auth.c'], ['-DW600_OTA_AUTH_TEST=1']),
     (F+'test_ota_receiver.c', [F+'ota_receiver.c'], []),
     (F+'test_ota_flash.c', [F+'ota_flash.c'], ['-DW600_OTA_FLASH_TEST=1']),
+    (F+'test_ota_chain.c', [F+'ota_receiver.c', F+'ota_auth.c', F+'ota_flash.c'], ['-DW600_OTA_FLASH_TEST=1','-DW600_OTA_AUTH_TEST=1']),
 ]
 for ota in (False, True):
     CASES.append((F+'test_radio.c', [F+'radio.c', C+'w600_frame.c', C+'w600_endpoint.c', C+'w600_pairing.c'] +

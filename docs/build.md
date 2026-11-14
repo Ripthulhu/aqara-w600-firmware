@@ -27,7 +27,7 @@ downloadable dependency:
 export CIU32_SDK='/absolute/path/to/CIU32L071 EclipseExampleProject'
 python3 firmware/build.py \
   --flash-application \
-  --controller-revision 44 \
+  --controller-revision 46 \
   --development-link-only
 ```
 
@@ -56,12 +56,17 @@ as `W600-2848.ota`, then run:
 
 ```sh
 python3 tools/package_ota.py --stock W600-2848.ota \
-  --image w600-controller44.bin --revision 44 --output w600-custom44.ota
+  --image w600-controller46.bin --revision 46 --output w600-custom46.ota
 ```
 
 The packer checks the donor's pinned SHA-256 and keeps its radio payload
 unchanged. Firmware dumps and the vendor SDK are not included in the source.
 
-The supplied application does not authorize a subsequent custom application.
-Further custom updates currently require a wired installation or an installed
-build explicitly authorizing the next image.
+Persistent builds always include follow-up OTA. The builder seals the image's
+W600 identity, revision, OTA capability and SHA256; the packer verifies these
+without changing the image. No next-image hash or special enable flag is needed.
+Use a higher controller revision for each update (46–255).
+
+The receiver trusts the paired Zigbee network, checks the whole staged image
+again before activation, and restarts after a successful update. These are
+integrity checks, not a firmware signature. Keep the Zigbee network trusted.

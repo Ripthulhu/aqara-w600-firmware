@@ -17,6 +17,7 @@ jobs:
         with:
           python-version: '3.12'
       - run: python3 tools/test_native.py
+      - run: python3 firmware/test_ota_image.py
       - run: python3 tools/test_package_ota.py
       - run: python3 tools/test_package_release.py
       - run: python3 tools/test_bundle_converter.py
