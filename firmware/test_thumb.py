@@ -382,9 +382,13 @@ def run(data, symbols, scenario):
         m.milliseconds(30); m.pressed = True; m.foreground()
         m.milliseconds(30); m.milliseconds(9999, service=False); m.foreground()
         assert not m.tx and not m.report()[6]
-        m.milliseconds(1); m.milliseconds(5)
-        frame = decode(bytes(m.tx))
-        assert frame.kind == 5 and frame.payload == bytes.fromhex("00510001")
+        m.milliseconds(1); m.milliseconds(70)
+        # The same hold also reports child-lock changes before pairing.
+        offset=0;replies=[]
+        while offset<len(m.tx):
+            size=10+int.from_bytes(m.tx[offset+5:offset+7],'big')
+            replies.append(decode(bytes(m.tx[offset:offset+size])));offset+=size
+        assert len([f for f in replies if f.kind==5 and f.payload==bytes.fromhex("00510001")])==1
         assert m.report()[6:8] == (1, 1) and m.report()[10] == 1
     else: raise AssertionError(scenario)
     return m.check()
