@@ -1,72 +1,50 @@
 # Install with Zigbee2MQTT
 
-For a CIU32L071 W600 running **stock 0.0.0_2848** (controller 28 / radio 48).
-Use stable power, update one head at a time, and pause automations that control
-that head. Keep SWD recovery available: this firmware is experimental.
+For a CIU32L071 W600 running stock **0.0.0_2848** (controller 28 / radio 48).
+The firmware is experimental; keep SWD recovery available.
 
-## 1. Create the OTA file
+## 1. Download
 
-Download `w600-controller44.bin` and `SHA256SUMS` from the
-[release](https://github.com/Ripthulhu/aqara-w600-firmware/releases), and verify
-the application's SHA-256 against `SHA256SUMS`.
-
-Download the [stock 2848 donor](https://raw.githubusercontent.com/Koenkk/zigbee-OTA/master/images/Lumi/20260626190610_OTA_lumi.airrtc.aeu005_0.0.0_2848_20260623_071869.ota)
-and save it as `W600-2848.ota`. Its SHA-256 must be:
-
-```text
-9929022f8755a23099efac929250284580296472d5fb98adf4513b5861d76d4d
-```
-
-From a checkout of this repository, with Python 3:
-
-```sh
-python3 tools/package_ota.py --stock W600-2848.ota \
-  --image w600-controller44.bin --revision 44 --output w600-custom44.ota
-```
-
-The packer checks the donor and application, keeps the stock radio unchanged,
-and writes `w600-custom44.ota` plus a checksum manifest. It does not contact or
-flash a valve. Do not rename a raw `.bin` to `.ota`.
+Download `w600-custom44.ota` and its `.sha256` file from the
+[release](https://github.com/Ripthulhu/aqara-w600-firmware/releases/tag/controller44-alpha1).
+GitHub Actions packages the OTA file and checks the firmware and stock donor.
 
 ## 2. Install the converter
 
-Install the [reference-status converter](../zigbee2mqtt/README.md)
-before updating the head. It prevents an old cached calibration
-status from hiding a lost position reference.
+Install the [reference-status converter](../zigbee2mqtt/README.md) for your
+custom-firmware heads. It keeps lost calibration from appearing as a valid
+valve position.
 
-## 3. Send the update
+## 3. Update
 
-Copy `w600-custom44.ota` to the running Zigbee2MQTT instance's data directory,
-for example `/app/data/ota/w600-custom44.ota`. Briefly press the valve's button
-to wake it; do not hold it.
+Pause automations controlling the head. Use Zigbee2MQTT's custom-firmware upload
+to send the `.ota` file to the valve. Briefly press its button to wake it when
+starting the update. Update one head at a time with stable power.
 
-Publish this **non-retained** MQTT message to
-`zigbee2mqtt/bridge/request/device/ota_update/update`, replacing the device ID:
+After restart, request an update check and confirm file version **11312
+(`0x2c30`)**. Transfer completion alone does not confirm installation.
+
+## 4. Calibrate
+
+The head starts off. Once mounted, wait at least two seconds after restart,
+then start calibration from Zigbee2MQTT. Allow up to six minutes.
+
+Check that the radiator heats when open and shuts off when closed. Select the
+external temperature sensor, supply its room readings, then restore your
+automations. Never calibrate an unmounted head.
+
+## MQTT alternative
+
+Publish a non-retained message to
+`zigbee2mqtt/bridge/request/device/ota_update/update`:
 
 ```json
 {
   "id": "0xYOUR_DEVICE_IEEE",
-  "url": "/app/data/ota/w600-custom44.ota"
+  "url": "https://github.com/Ripthulhu/aqara-w600-firmware/releases/download/controller44-alpha1/w600-custom44.ota"
 }
 ```
 
-The path is on Zigbee2MQTT's machine/container, not the computer showing its
-web interface. You can also use its frontend's custom firmware upload where
-available. These are [Zigbee2MQTT's custom-update mechanisms](https://www.zigbee2mqtt.io/guide/usage/ota_updates.html#using-custom-firmware-files-or-index).
-
-Watch the progress and matching update response. After the head restarts,
-request an update check and verify that the **device reports file version
-11312 (`0x2c30`)**. Transfer completion alone does not prove the controller
-installed the application.
-
-## 4. Calibrate and restore control
-
-The application starts off. Wait at least two seconds after restart.
-Once the head is mounted, run calibration from
-Zigbee2MQTT and wait for completion; allow up to six minutes. Confirm that
-opening heats the radiator and closing shuts it off, then restore your room
-automations. Select the external temperature sensor and supply its readings
-from your room sensor.
-
-The stock-to-custom packaging path is tested. Each release separately states
-whether its exact application has had mounted hardware testing.
+See [Zigbee2MQTT's custom-update documentation](https://www.zigbee2mqtt.io/guide/usage/ota_updates.html#using-custom-firmware-files-or-index)
+for local-file and custom-index options. Developer packaging instructions are
+in [Build and test](build.md).

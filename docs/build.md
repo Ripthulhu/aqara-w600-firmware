@@ -40,10 +40,26 @@ head.
 
 ## Update authorization and packaging
 
-Use `tools/package_ota.py` with the stock donor and custom application as shown
-in the [OTA guide](ota.md). The public packer needs no firmware dump; the bundled
-obfuscation stream is not executable firmware. Aqara's radio payload stays in
-the donor and generated local package, not this repository.
+The **Package release OTA** workflow runs when a release is published. Create a
+draft release, attach exactly one `w600-controllerREVISION.bin` and its entry in
+`SHA256SUMS`, then publish. CI downloads the pinned stock 2848 donor, verifies
+both inputs, and attaches the `.ota`, packaging manifest, and OTA checksum.
+Existing assets must match; CI refuses to replace different files.
+
+To package an existing release, run the workflow manually with its release tag.
+This job packages an already compiled application. Source compilation still
+requires the vendor SDK described above.
+
+For local packaging, download the [stock 2848 donor](https://raw.githubusercontent.com/Koenkk/zigbee-OTA/master/images/Lumi/20260626190610_OTA_lumi.airrtc.aeu005_0.0.0_2848_20260623_071869.ota)
+as `W600-2848.ota`, then run:
+
+```sh
+python3 tools/package_ota.py --stock W600-2848.ota \
+  --image w600-controller44.bin --revision 44 --output w600-custom44.ota
+```
+
+The packer checks the donor's pinned SHA-256 and keeps its radio payload
+unchanged. Firmware dumps and the vendor SDK are not included in the source.
 
 The supplied application does not authorize a subsequent custom application.
 Further custom updates currently require a wired installation or an installed

@@ -22,13 +22,13 @@ Room control uses a separate temperature sensor.
 
 Start with **stock 0.0.0_2848**, controller 28 / radio 48.
 
-1. Download the custom application from [Releases](https://github.com/Ripthulhu/aqara-w600-firmware/releases).
-2. Follow the [Zigbee2MQTT OTA guide](docs/ota.md) to create and install the update.
+1. Download the ready-to-upload `.ota` file from [Releases](https://github.com/Ripthulhu/aqara-w600-firmware/releases).
+2. Follow the [Zigbee2MQTT OTA guide](docs/ota.md) to install the converter and update.
 3. Mount the head, calibrate it, and check that the radiator both heats and shuts
    off before enabling automatic control.
 
-The packer uses a stock download supplied by you, so this repository does not
-redistribute Aqara's radio firmware. A raw `.bin` is not an OTA file.
+GitHub Actions packages each release using a checked stock download, retaining
+the original radio. You do not need a local build or packaging tools.
 
 ## Development
 

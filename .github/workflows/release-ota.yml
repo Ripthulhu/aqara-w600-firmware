@@ -1,0 +1,52 @@
+name: Package release OTA
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: Existing release containing the application and SHA256SUMS
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-ota-${{ github.event.release.tag_name || inputs.release_tag }}
+  cancel-in-progress: false
+
+jobs:
+  package:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      RELEASE_TAG: ${{ github.event.release.tag_name || inputs.release_tag }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Test packaging
+        run: |
+          python3 tools/test_package_ota.py
+          python3 tools/test_package_release.py
+      - name: Download release application and pinned stock donor
+        shell: bash
+        run: |
+          [[ "$RELEASE_TAG" =~ ^[A-Za-z0-9][A-Za-z0-9._/-]{0,127}$ ]]
+          gh release download "$RELEASE_TAG" --pattern 'w600-controller*.bin' --pattern SHA256SUMS --dir release-input
+          curl --fail --location --retry 3 --max-time 120 --max-filesize 662650 \
+            'https://raw.githubusercontent.com/Koenkk/zigbee-OTA/master/images/Lumi/20260626190610_OTA_lumi.airrtc.aeu005_0.0.0_2848_20260623_071869.ota' \
+            --output W600-2848.ota
+      - name: Verify, package, and attach OTA assets
+        run: >-
+          python3 tools/package_release.py --input release-input --stock W600-2848.ota
+          --output release-ota --publish "$RELEASE_TAG"

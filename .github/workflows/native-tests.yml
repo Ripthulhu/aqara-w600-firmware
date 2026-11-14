@@ -18,4 +18,5 @@ jobs:
           python-version: '3.12'
       - run: python3 tools/test_native.py
       - run: python3 tools/test_package_ota.py
+      - run: python3 tools/test_package_release.py
       - run: node --test zigbee2mqtt/test_w600_reference.mjs
