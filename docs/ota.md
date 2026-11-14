@@ -9,8 +9,9 @@ rejects all follow-up images. Sending a different OTA package cannot change it.
 
 ## 1. Download
 
-Download `w600-custom44.ota` and its `.sha256` file from the
-[release](https://github.com/Ripthulhu/aqara-w600-firmware/releases/tag/controller44-alpha1).
+Download the `.ota` file and its `.sha256` from
+[Releases](https://github.com/Ripthulhu/aqara-w600-firmware/releases).
+Choose controller46 or later for follow-up OTA support.
 GitHub Actions packages the OTA file and checks the firmware and stock donor.
 
 ## 2. Install the converter
@@ -24,8 +25,8 @@ Pause automations controlling the head. Use Zigbee2MQTT's custom-firmware upload
 to send the `.ota` file to the valve. Briefly press its button to wake it when
 starting the update. Update one head at a time with stable power.
 
-After restart, request an update check and confirm file version **11312
-(`0x2c30`)**. Transfer completion alone does not confirm installation.
+After restart, request an update check and confirm the installed version matches
+the release. Transfer completion alone does not confirm installation.
 
 ## 4. Calibrate
 
@@ -44,7 +45,7 @@ Publish a non-retained message to
 ```json
 {
   "id": "0xYOUR_DEVICE_IEEE",
-  "url": "https://github.com/Ripthulhu/aqara-w600-firmware/releases/download/controller44-alpha1/w600-custom44.ota"
+  "url": "RELEASE_ASSET_URL"
 }
 ```
 
