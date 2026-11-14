@@ -380,8 +380,10 @@ def run(data, symbols, scenario):
         assert m.report()[9] == 1 and not m.report()[8] and m.memmove_calls
     elif scenario == "pair_gesture":
         m.milliseconds(30); m.pressed = True; m.foreground()
-        m.milliseconds(30); m.milliseconds(9999, service=False); m.foreground()
-        assert not m.tx and not m.report()[6]
+        m.milliseconds(30); m.milliseconds(3000, service=False); m.foreground()
+        m.milliseconds(70)  # Drain the real three-second lock report before pairing.
+        m.milliseconds(6929, service=False); m.foreground()
+        assert not m.report()[6] and not m.report()[10]
         m.milliseconds(1); m.milliseconds(70)
         # The same hold also reports child-lock changes before pairing.
         offset=0;replies=[]
