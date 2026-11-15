@@ -5,6 +5,58 @@
 
 static void high(struct motor_slowdown *s,uint32_t *at,uint32_t mv)
 { for(unsigned i=0;i<22;i++,*at+=200) assert(!motor_slowdown_observe(s,*at,mv)); }
+static void window(struct motor_seat *s,uint32_t *at,uint32_t mv,uint32_t expected)
+{
+    for(unsigned i=0;i<10;++i,*at+=200) {
+        if(expected) (void)motor_seat_return_observe(s,*at,mv,expected);
+        else (void)motor_seat_observe(s,*at,mv);
+    }
+}
+static void plateau_tests(void)
+{
+    for(unsigned wrap=0;wrap<2;++wrap) {
+        struct motor_seat s={0};uint32_t at=wrap ? UINT32_MAX-10000u : 0;
+        for(unsigned i=0;i<10;++i) window(&s,&at,1390,0);
+        for(unsigned i=0;i<20;++i) window(&s,&at,945,0);
+        assert(!motor_seat_loaded(&s) && !s.candidate);
+        window(&s,&at,1042,0); /* Saved failure's75% entry boundary is1042.5mV. */
+        for(unsigned i=1;i<25;++i) {
+            window(&s,&at,i%2 ? 1049 : 1041,0);
+            assert(motor_seat_loaded(&s)==(i==24));
+        }
+        assert(s.plateau_mv==1042 && !s.candidate); /* No invented valley recovery. */
+        window(&s,&at,1092,0);assert(motor_seat_loaded(&s)); /* Exactly50mV. */
+        window(&s,&at,1093,0);assert(!motor_seat_loaded(&s));
+        for(unsigned i=0;i<30;++i) window(&s,&at,1093,0);
+        assert(!motor_seat_loaded(&s)); /* An exited band cannot restart above75%. */
+        motor_seat_reset(&s);at=0;
+        for(unsigned i=0;i<10;++i) window(&s,&at,1300,0);
+        for(unsigned i=0;i<100;++i) window(&s,&at,1000,0);
+        assert(!motor_seat_loaded(&s)); /* Mere spring contact never enters the band. */
+        motor_seat_reset(&s);at=0;
+        for(unsigned i=0;i<10;++i) window(&s,&at,1390,0);
+        window(&s,&at,1040,0);
+        for(unsigned i=0;i<10;++i) window(&s,&at,1045+5*i,0);
+        assert(!motor_seat_loaded(&s) && s.plateau_mv==1040);
+        window(&s,&at,1095,0);assert(!s.plateau_count); /* Fixed anchor, not moving average. */
+        motor_seat_reset(&s);at=0;
+        for(unsigned i=0;i<10;++i) window(&s,&at,1390,0);
+        for(unsigned i=0;i<24;++i) window(&s,&at,1042,0);
+        at+=400;window(&s,&at,1042,0);
+        assert(!motor_seat_loaded(&s) && !s.baseline_mv); /* Missing samples erase proof. */
+    }
+    for(unsigned wrong=0;wrong<3;++wrong) {
+        struct motor_seat s={0};uint32_t at=0;
+        for(unsigned i=0;i<10;++i) window(&s,&at,1390,1000);
+        for(unsigned i=0;i<30;++i) window(&s,&at,wrong==1 ? 1101 : wrong==2 ? 899 : 1000,1000);
+        assert(motor_seat_loaded(&s)==!wrong); /* Hysteresis never weakens return matching. */
+    }
+    struct motor_seat s={0};uint32_t at=0;
+    for(unsigned i=0;i<10;++i) window(&s,&at,1390,945);
+    for(unsigned i=0;i<30;++i) window(&s,&at,1042,945);
+    assert(!motor_seat_loaded(&s)); /* Within100mV but outside10% still fails. */
+    puts("PASS fixed-anchor load band: threshold chatter, contact rejection, drift, gaps and return matching");
+}
 static void seat_tests(void)
 {
     _Static_assert(sizeof(struct motor_seat)==32,"Keep motor-state layout unchanged");
@@ -125,4 +177,5 @@ int main(int argc,char **argv)
     assert(motor_slowdown_observe(&s,at,1000));
     puts("PASS provisional slowdown: sustained drop, steady signals, transients, gaps, invalid input, wrap");
     seat_tests();
+    plateau_tests();
 }

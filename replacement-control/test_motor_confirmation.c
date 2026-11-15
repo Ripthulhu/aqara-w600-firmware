@@ -278,28 +278,41 @@ static void closing_load_is_not_closed(void)
         cases+=2;
     }
 }
-static void closing_seat_confirmation(void)
+static void closing_valley_is_not_closed(void)
 {
     for(unsigned wrap=0;wrap<2;++wrap) {
         struct fixture f;init(&f,wrap ? UINT32_MAX-10000u : 0);high_until(&f,4000);
         uint32_t at=4200;
         for(;at<=10000;at+=200) assert(feed(&f,at,800));
         for(;f.c.state==MOTOR_CAL_ACTIVE && at<18000;at+=200) assert(feed(&f,at,1000));
-        assert(f.c.state==MOTOR_CAL_WAIT_STOP && !f.motor_on && f.c.seat.candidate);
-        assert(confirm(&f,true) && f.c.original_seat && !f.c.confirmed_candidates);
-        backoff(&f);high_until(&f,4000);
-        for(at=4200;at<=10000;at+=200) assert(feed(&f,at,800));
-        for(;f.c.state==MOTOR_CAL_ACTIVE && at<18000;at+=200) assert(feed(&f,at,1000));
-        assert(f.c.state==MOTOR_CAL_WAIT_STOP && f.c.seat.candidate && !f.motor_on);
-        assert(confirm(&f,true) && f.c.confirmed_candidates==1 && !f.c.measured_legs);
-        assert(f.c.phase==MOTOR_CAL_MEASURE && f.c.confirmed_return_mv==1000);
+        assert(f.c.state==MOTOR_CAL_ACTIVE && f.motor_on && f.c.seat.candidate);
+        for(;at<450000;at+=200) assert(feed(&f,at,1000));
+        assert(!feed(&f,450000,1000));
+        assert(f.c.state==MOTOR_CAL_FAILED && !f.motor_on && !f.c.confirmed_candidates);
         ++cases;
-        init(&f,0);high_until(&f,4000);
-        for(at=4200;at<=10000;at+=200) assert(feed(&f,at,800));
-        for(;f.c.state==MOTOR_CAL_ACTIVE;at+=200) assert(feed(&f,at,1000));
-        assert(confirm(&f,true));backoff(&f);
-        candidate(&f,19000);assert(!confirm(&f,true));
-        assert(f.c.state==MOTOR_CAL_FAILED && !f.c.confirmed_candidates); /* Different return signal cannot confirm a seat. */
+    }
+}
+static void early_valley_then_confirmed_load(void)
+{
+    for(unsigned wrap=0;wrap<2;++wrap) {
+        struct fixture f;init(&f,wrap ? UINT32_MAX-10000u : 0);
+        f.c.confirmation.return_ticks=100000;f.c.confirmation.return_limit_ticks=102000;
+        drive(&f);uint32_t at=200;
+        for(;at<=100000;at+=200) assert(feed(&f,at,1365));
+        for(;at<=208000;at+=200) assert(feed(&f,at,678));
+        for(;at<=214000;at+=200) assert(feed(&f,at,849));
+        assert(f.c.seat.candidate && f.c.state==MOTOR_CAL_ACTIVE && f.motor_on);
+        assert((uint32_t)(f.c.last_now-f.c.closing_load_at)<200000u);
+        for(;f.c.state==MOTOR_CAL_ACTIVE && at<400000;at+=200) assert(feed(&f,at,849));
+        assert(f.c.state==MOTOR_CAL_WAIT_STOP && !f.motor_on);
+        assert((uint32_t)(f.c.stop_requested_at-f.c.closing_load_at)>=200000u);
+        assert(confirm(&f,true) && f.c.original_load && !f.c.original_seat && !f.c.confirmed_candidates);
+        high_until(&f,18000);assert(f.c.state==MOTOR_CAL_WAIT_STOP);
+        assert(confirm(&f,false) && f.c.phase==MOTOR_CAL_CONFIRM_RETURN);
+        high_until(&f,20000);
+        for(at=20200;f.c.state==MOTOR_CAL_ACTIVE && at<100000;at+=200) assert(feed(&f,at,849));
+        assert(f.c.state==MOTOR_CAL_WAIT_STOP && !f.motor_on);
+        assert(confirm(&f,true) && f.c.confirmed_candidates==1 && f.c.phase==MOTOR_CAL_MEASURE);
         ++cases;
     }
 }
@@ -359,15 +372,34 @@ static void same_closing_signal(void)
         cases+=2;
     }
 }
+static void threshold_chatter_confirmation(void)
+{
+    for(unsigned wrap=0;wrap<2;++wrap) {
+        struct fixture f;init(&f,wrap ? UINT32_MAX-10000u : 0);drive(&f);
+        uint32_t at=200;
+        for(;at<=20000;at+=200) assert(feed(&f,at,1390));
+        for(;at<=60000;at+=200) assert(feed(&f,at,945));
+        for(;at<=62000;at+=200) assert(feed(&f,at,1042));
+        for(;f.c.state==MOTOR_CAL_ACTIVE && at<300000;at+=200)
+            assert(feed(&f,at,(at/2000u)%2 ? 1049 : 1041));
+        assert(f.c.state==MOTOR_CAL_WAIT_STOP && !f.motor_on && !f.c.seat.candidate);
+        assert((uint32_t)(f.c.stop_requested_at-f.c.closing_load_at)>=200000u);
+        assert(confirm(&f,true) && f.c.original_load && !f.c.confirmed_candidates);
+        assert(f.c.phase==MOTOR_CAL_CONFIRM_BACKOFF && !f.c.measured_legs);
+        ++cases;
+    }
+}
 int main(int argc,char **argv)
 {
     if (argc==4) {replay(argv[1],(uint32_t)strtoul(argv[2],NULL,10),(uint32_t)strtoul(argv[3],NULL,10));return 0;}
     assert(argc==1);
     complete_flows();uncertain_lows_stop();confirmation_failures();stop_faults_and_tokens();mounting_retraction();
     closing_load_is_not_closed();
-    closing_seat_confirmation();
+    closing_valley_is_not_closed();
     sustained_load_confirmation();
     same_closing_signal();
+    threshold_chatter_confirmation();
+    early_valley_then_confirmed_load();
     printf("motor confirmation: %u cases PASS; bounded electrical confirmation, not physical acceptance\n",cases);
     return 0;
 }

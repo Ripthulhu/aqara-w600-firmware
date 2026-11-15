@@ -54,10 +54,11 @@ static bool seat_observe(struct motor_seat *s,uint32_t at,uint32_t mv,uint32_t e
     s->count=0;s->sum=0;
     if(!s->baseline_mv) return false;
     uint32_t difference=mean>expected_mv ? mean-expected_mv : expected_mv-mean;
+    uint32_t delta=mean>s->plateau_mv ? mean-s->plateau_mv : s->plateau_mv-mean;
+    /* Keep a qualified load band across threshold noise, without following drift. */
     bool load=expected_mv ? difference<=100u && difference*100u<=expected_mv*10u :
-                           mean*100u<=s->baseline_mv*75u;
+                           mean*100u<=s->baseline_mv*75u || (s->plateau_count && delta<=50u);
     if(load) {
-        uint32_t delta=mean>s->plateau_mv ? mean-s->plateau_mv : s->plateau_mv-mean;
         if(!s->plateau_count || delta>50u) {s->plateau_mv=mean;s->plateau_count=1;}
         else if(s->plateau_count<25u) ++s->plateau_count;
     } else s->plateau_count=0;

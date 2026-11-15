@@ -289,9 +289,10 @@ static void loaded_feedback(void)
     for(unsigned i=0;i<2200;++i) {
         running_mv=i<600 ? 1300 : i<1000 ? 800 : 1000;
         step(&f,true);
+        if(i==1500) assert(f.control.moving && f.endpoint.opening_permille>0 && !f.motor.stop_confirmed);
         if(f.control.have_move && !f.control.moving) break;
     }
-    assert(f.control.move_seat.candidate && now<20000u && f.motor.stop_confirmed);
+    assert(!f.control.move_seat.candidate && now>=20000u && f.motor.stop_confirmed);
     assert(f.endpoint.calibrated && f.endpoint.opening_known && !f.endpoint.opening_permille);
     assert(!f.control.motion_error && f.control.position.valid);
 

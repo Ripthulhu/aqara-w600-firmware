@@ -87,15 +87,8 @@ static void __attribute__((noinline)) movement_poll(struct w600_valve_calibratio
         if (m->samples!=c->move_samples) {
             c->move_samples=m->samples;
             if (m->samples>1 && m->last_mv>=MOTOR_HOMING_MOTION_MIN_MV) c->saw_motion=true;
-            if(m->samples>1 && c->move_target==0 && m->direction==2 &&
-               m->sample.valid && !m->sample.error &&
-               motor_seat_observe(&c->move_seat,m->sample_at_ticks,m->last_mv) &&
-               !c->move_stopping) {
-                c->move_stopping=true;
-                if(!w600_motor_service_finish(m)) {movement_fail(c,W600_CONTROL_DRIVER);return;}
-            }
         }
-        if (m->homing.state==MOTOR_HOMING_ENDPOINT_OBSERVED || c->move_seat.candidate) {
+        if (m->homing.state==MOTOR_HOMING_ENDPOINT_OBSERVED) {
             bool expected=(c->move_target==0 && m->direction==2) ||
                           (c->move_target==1000 && m->direction==1);
             if (!expected) { movement_fail(c,W600_CONTROL_ENDPOINT); return; }
@@ -214,7 +207,7 @@ void w600_valve_calibration_feedback(struct w600_valve_calibration *c)
               m->homing.state==MOTOR_HOMING_SEEK_ENDPOINT &&
               (m->last_mv<=policy.homing[0].endpoint_max ||
                (m->direction==1 && c->sequence.slowdown.candidate) ||
-               (m->direction==2 && (c->sequence.seat.candidate || motor_seat_loaded(&c->sequence.seat))))));
+               (m->direction==2 && motor_seat_loaded(&c->sequence.seat)))));
     }
 }
 void w600_valve_calibration_poll(struct w600_valve_calibration *c,uint32_t now,bool sensor_busy)

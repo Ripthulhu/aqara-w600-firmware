@@ -5,7 +5,7 @@
 #define HALF UINT32_C(0x80000000)
 enum { STOP_PROBE_LOW=1, STOP_ENDPOINT=3, STOP_PROBE_INCONCLUSIVE,
        STOP_CANDIDATE, STOP_CONFIRM_BACKOFF, STOP_CONFIRM_RETURN,
-       STOP_SEAT_CANDIDATE, STOP_SEAT_RETURN, STOP_LOAD_CANDIDATE, STOP_LOAD_RETURN };
+       STOP_LOAD_CANDIDATE=10, STOP_LOAD_RETURN };
 
 static bool live(const struct motor_calibration *c)
 { return c->state==MOTOR_CAL_ACTIVE || c->state==MOTOR_CAL_WAIT_STOP; }
@@ -216,10 +216,9 @@ static bool candidate_feedback(struct motor_calibration *c,uint32_t now,uint32_t
     bool loaded=motor_slowdown_observe(&c->slowdown,at,value) &&
                 c->homing.state==MOTOR_HOMING_SEEK_ENDPOINT;
     bool returning=c->phase==MOTOR_CAL_CONFIRM_RETURN;
-    bool seated=(returning && c->original_load ?
-                 motor_seat_return_observe(&c->seat,at,value,c->original_load_mv) :
-                 motor_seat_observe(&c->seat,at,value)) &&
-                c->homing.state==MOTOR_HOMING_SEEK_ENDPOINT && c->direction==MOTOR_CAL_CLOSE;
+    if(returning && c->original_load)
+        (void)motor_seat_return_observe(&c->seat,at,value,c->original_load_mv);
+    else (void)motor_seat_observe(&c->seat,at,value);
     bool plateau=motor_seat_loaded(&c->seat) && c->direction==MOTOR_CAL_CLOSE &&
                  c->homing.state==MOTOR_HOMING_SEEK_ENDPOINT;
     if(returning) {
@@ -233,13 +232,12 @@ static bool candidate_feedback(struct motor_calibration *c,uint32_t now,uint32_t
     bool measuring_close=c->phase==MOTOR_CAL_MEASURE && c->direction==MOTOR_CAL_CLOSE;
     if(measuring_close && c->measured_close_kind) {
         plateau=plateau && c->measured_close_kind==2;
-        seated=seated && c->measured_close_kind==1;
     }
-    if((plateau || (seated && (!returning || !c->original_load))) && c->phase!=MOTOR_CAL_CONFIRM_BACKOFF) {
+    /* A spring-load valley/recovery is not a closed valve; confirm a stable load instead. */
+    if(plateau && c->phase!=MOTOR_CAL_CONFIRM_BACKOFF) {
         c->have_first_low=true;c->first_low_on=c->last_sample_on;
         if(probe(c)) {c->phase=MOTOR_CAL_HOME;c->action.on_budget_ticks=c->homing.policy.max_move_ticks;}
-        request_stop(c,now,plateau ? (returning ? STOP_LOAD_RETURN : STOP_LOAD_CANDIDATE) :
-                                   (returning ? STOP_SEAT_RETURN : STOP_SEAT_CANDIDATE));
+        request_stop(c,now,returning ? STOP_LOAD_RETURN : STOP_LOAD_CANDIDATE);
         return true;
     }
     if(loaded && !low) {
@@ -313,7 +311,7 @@ bool motor_calibration_feedback(struct motor_calibration *c,uint32_t token,uint3
 }
 uint32_t motor_calibration_stop_dwell(const struct motor_calibration *c)
 {
-    return c->stop_reason==STOP_CANDIDATE || c->stop_reason==STOP_SEAT_CANDIDATE || c->stop_reason==STOP_CONFIRM_BACKOFF ?
+    return c->stop_reason==STOP_CANDIDATE || c->stop_reason==STOP_CONFIRM_BACKOFF ?
         c->confirmation.rest_ticks : c->stop_reason==STOP_LOAD_CANDIDATE ?
         c->confirmation.rest_ticks : c->policy.min_stop_ticks;
 }
@@ -338,8 +336,8 @@ bool motor_calibration_confirm_stop(struct motor_calibration *c,uint32_t token,
     if((uint32_t)(now-c->stop_observed_at)<motor_calibration_stop_dwell(c)) return false;
     motor_calibration_tick(c,now);
     if(c->state!=MOTOR_CAL_WAIT_STOP || !count_ok(c,now,final_on)) return false;
-    if (c->stop_reason==STOP_CANDIDATE || c->stop_reason==STOP_SEAT_CANDIDATE || c->stop_reason==STOP_LOAD_CANDIDATE) {
-        c->original_seat=c->stop_reason==STOP_SEAT_CANDIDATE;
+    if (c->stop_reason==STOP_CANDIDATE || c->stop_reason==STOP_LOAD_CANDIDATE) {
+        c->original_seat=false;
         c->original_load=c->stop_reason==STOP_LOAD_CANDIDATE;
         c->original_load_mv=c->original_load ? c->seat.plateau_mv : 0;
         c->original_phase=c->phase; c->original_direction=c->direction;
@@ -358,7 +356,7 @@ bool motor_calibration_confirm_stop(struct motor_calibration *c,uint32_t token,
     enum motor_calibration_phase completed_phase=c->phase;
     uint32_t travel=c->first_low_on, travel_final=final_on, travel_token=token;
     if (c->phase==MOTOR_CAL_CONFIRM_RETURN) {
-        if (c->stop_reason!=(c->original_load ? STOP_LOAD_RETURN : c->original_seat ? STOP_SEAT_RETURN : STOP_CONFIRM_RETURN) || c->original_direction!=c->direction ||
+        if (c->stop_reason!=(c->original_load ? STOP_LOAD_RETURN : STOP_CONFIRM_RETURN) || c->original_direction!=c->direction ||
             (c->original_phase!=MOTOR_CAL_HOME && c->original_phase!=MOTOR_CAL_MEASURE)) {
             fail(c,MOTOR_CAL_BAD_STATE); return false;
         }
@@ -387,7 +385,7 @@ bool motor_calibration_confirm_stop(struct motor_calibration *c,uint32_t token,
            travel>c->policy.max_travel_ticks) { fail(c,MOTOR_CAL_TRAVEL_RANGE); return false; }
         unsigned index=c->direction-1u, repeat=c->measured_legs/2u;
         if(c->direction==MOTOR_CAL_CLOSE) {
-            uint8_t kind=c->original_load ? 2u : c->original_seat ? 1u : 3u;
+            uint8_t kind=c->original_load ? 2u : 3u;
             if(c->measured_close_kind && kind!=c->measured_close_kind) {
                 fail(c,MOTOR_CAL_REPEATABILITY); return false;
             }
