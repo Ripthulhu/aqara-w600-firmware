@@ -17,7 +17,7 @@
 
 Battery runtime, long-term wear, exact physical opening percentage, and power-loss
 rollback remain unqualified. Keep SWD recovery available. This replaces the valve
-controller, not the radio or the boiler's own controls.
+controller; the original radio is retained.
 
 ## Temperature control
 
