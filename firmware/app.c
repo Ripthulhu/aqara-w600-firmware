@@ -256,7 +256,7 @@ static bool ota_commit(void *context,uint32_t length,uint16_t crc,uint32_t revis
 }
 static void ota_failed_restart(uint32_t now,bool transport_failed)
 {
-    if(ota_owned && ota.state==W600_OTA_FAILED &&
+    if(ota_owned &&
        (transport_failed || w600_ota_restart_ready(&ota,now)) &&
        motor.stop_confirmed && !motor.owned && !motor.board.owned &&
        !motor.cleanup_failed && !temperature.owned && !temperature.board.owned &&

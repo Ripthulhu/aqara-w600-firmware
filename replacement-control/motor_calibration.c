@@ -337,7 +337,6 @@ bool motor_calibration_confirm_stop(struct motor_calibration *c,uint32_t token,
     motor_calibration_tick(c,now);
     if(c->state!=MOTOR_CAL_WAIT_STOP || !count_ok(c,now,final_on)) return false;
     if (c->stop_reason==STOP_CANDIDATE || c->stop_reason==STOP_LOAD_CANDIDATE) {
-        c->original_seat=false;
         c->original_load=c->stop_reason==STOP_LOAD_CANDIDATE;
         c->original_load_mv=c->original_load ? c->seat.plateau_mv : 0;
         c->original_phase=c->phase; c->original_direction=c->direction;

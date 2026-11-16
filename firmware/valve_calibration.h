@@ -18,7 +18,6 @@ struct w600_valve_calibration {
     bool endpoint_qualified, calibration_applied;
     bool external_seen, moving, move_stopping, interrupted_move, saw_motion, have_move;
     bool calibration_preparing;
-    struct motor_seat move_seat;
 };
 
 enum w600_mount_state { W600_MOUNT_IDLE, W600_MOUNT_ACTIVE, W600_MOUNT_RETRACTED,

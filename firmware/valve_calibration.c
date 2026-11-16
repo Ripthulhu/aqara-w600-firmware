@@ -156,7 +156,6 @@ static void __attribute__((noinline)) movement_poll(struct w600_valve_calibratio
     c->move_budget=plan.required_ticks<200u ? 200u : plan.required_ticks;
     c->move_target=target; c->move_stopping=false; c->interrupted_move=false;
     c->saw_motion=false; c->move_samples=0;
-    motor_seat_reset(&c->move_seat);
     c->moving=true; e->moving=true;
     c->control_updates=e->control_updates;
     if (!w600_motor_service_begin(m,plan.direction)) movement_fail(c,W600_CONTROL_DRIVER);
@@ -221,6 +220,9 @@ void w600_valve_calibration_poll(struct w600_valve_calibration *c,uint32_t now,b
         (!c->external_seen || c->external_updates!=e->external_updates)) {
         c->external_seen=true; c->external_updates=e->external_updates; c->external_at=now;
     }
+    /* Only a new sensor record may restore availability after expiry. */
+    if (c->external_seen && (uint32_t)(now-c->external_at)>=12u*60u*10000u)
+        e->known&=~W600_KNOWN_EXTERNAL_TEMP;
     if (e->cancel_calibration) {
         e->cancel_calibration=false; e->calibration_pending=false;
         c->calibration_preparing=false;

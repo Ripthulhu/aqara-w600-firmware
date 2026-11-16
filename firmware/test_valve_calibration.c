@@ -269,6 +269,37 @@ static void normal_controls(void)
     step(&f,true); assert(command(&f,39,3,0)==0); settled(&f);
     assert(!f.control.motion_error); /* Immediate Off is not a no-motion fault. */
 }
+static void stale_temperature_wrap(void)
+{
+    for(unsigned wrap=0;wrap<2;++wrap) for(unsigned off=0;off<2;++off) {
+        struct fixture f;reference(&f,0);
+        now=wrap ? UINT32_MAX-100u : 10u;
+        word(&f,0,2200);word(&f,5,2100);
+        if(!off) assert(command(&f,70,3,1)==0);
+        w600_valve_calibration_poll(&f.control,now,true);
+        uint32_t received_at=f.control.external_at;
+        now=received_at+12u*60u*10000u-1u;
+        w600_valve_calibration_poll(&f.control,now,true);
+        assert(f.endpoint.requested_opening==(off ? 0 : 1000) && !starts);
+        ++now;
+        w600_valve_calibration_poll(&f.control,now,true);
+        assert(!f.endpoint.requested_opening && !starts);
+        /* A full timer wrap must not revive the cached sensor value. */
+        now=received_at;
+        if(off) assert(command(&f,71,3,1)==0);
+        w600_valve_calibration_poll(&f.control,now,true);
+        assert(!f.endpoint.requested_opening && !starts &&
+               f.endpoint.control_error==W600_CONTROL_TEMPERATURE);
+        word(&f,0,2300);
+        w600_valve_calibration_poll(&f.control,now+10u,true);
+        assert(!f.endpoint.requested_opening && !starts);
+        word(&f,5,2100); /* Even an unchanged value is a new sensor receipt. */
+        w600_valve_calibration_poll(&f.control,now+20u,true);
+        assert(f.endpoint.requested_opening==1000 && !f.endpoint.control_error && !starts);
+        assert(f.control.external_at==now+20u);
+    }
+    puts("PASS external temperature: expiry survives full timer wrap, Off and timestamp wrap; only new sensor receipt restores control");
+}
 static void loaded_feedback(void)
 {
     struct fixture f;
@@ -292,7 +323,7 @@ static void loaded_feedback(void)
         if(i==1500) assert(f.control.moving && f.endpoint.opening_permille>0 && !f.motor.stop_confirmed);
         if(f.control.have_move && !f.control.moving) break;
     }
-    assert(!f.control.move_seat.candidate && now>=20000u && f.motor.stop_confirmed);
+    assert(now>=20000u && f.motor.stop_confirmed);
     assert(f.endpoint.calibrated && f.endpoint.opening_known && !f.endpoint.opening_permille);
     assert(!f.control.motion_error && f.control.position.valid);
 
@@ -621,6 +652,7 @@ int main(void)
     slow_start_probe();
     unknown_sensor_selection();
     normal_controls();
+    stale_temperature_wrap();
     struct fixture clock; init(&clock); assert(command(&clock,1,9,1)==0);
     w600_valve_calibration_poll(&clock.control,now,false);
     now=9; w600_valve_calibration_poll(&clock.control,now,false);

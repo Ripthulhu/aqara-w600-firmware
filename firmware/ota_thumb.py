@@ -24,7 +24,8 @@ STAGE=0x08010800
 STAGE_END=STAGE+0xce00
 MARKER=0x08001e00
 SCENARIOS=('receive_auth_denied','traffic','power_cut','bad_header','duplicate',
-           'timeout','busy_reject','display_timeout','radio_abort','uncertain_marker','failure_transport','receive_valid')
+           'timeout','busy_reject','display_timeout','radio_abort','uncertain_marker','failure_transport',
+           'header_transport','body_transport','body_transport_uncertain_marker','receive_valid')
 
 
 def parse_ota_fields(text):
@@ -386,6 +387,27 @@ def run(data,symbols,name,ota_layout):
         m.direction_buttons=0;m.levels(service.PA)
         until(m,lambda:m.virtual_us>=1900000 and m.display_report()[2]==0)
     index,request=start(m)
+    if name in ('header_transport','body_transport','body_transport_uncertain_marker'):
+        if name!='header_transport':
+            image,header=image_and_header();respond(m,request,header)
+            index,request=wait_frame(m,lambda f:f.kind==6 and f.payload[:2]==bytes.fromhex('4001'),index+1)
+            for offset in (0,224,448):
+                respond(m,request,image[offset:offset+224])
+                index,request=wait_frame(m,lambda f:f.kind==6 and f.payload[:2]==bytes.fromhex('4001'),index+1)
+            assert m.erases==1 and int.from_bytes(request.payload[5:9],'big')==800
+        if name=='body_transport_uncertain_marker':
+            m.cpu.mem_write(MARKER+508,b'\x00')
+            before=bytes(m.cpu.mem_read(0x08000000,0x20000))
+            m.uart_error=1
+            for _ in range(10000):
+                if m.reason in ('fatal','reset'):break
+                m.step(500)
+            assert m.reason=='fatal' and m.reset_requested_at is None
+            assert m.off() and not m.timer_runs
+            assert bytes(m.cpu.mem_read(0x08000000,0x20000))==before
+            return dict(transport_fault_with_uncertain_marker_prevents_reset=True,
+                        motor_off=True,flash_unchanged=True)
+        return recover_failure(m,data,symbols,transport_failure=True)
     if name=='receive_valid':
         revision=m.get(symbols['w600_ota_identity']+20)+1
         image,header=image_and_header();image=bytearray(image)

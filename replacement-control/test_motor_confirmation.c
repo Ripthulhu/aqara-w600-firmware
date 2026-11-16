@@ -306,7 +306,7 @@ static void early_valley_then_confirmed_load(void)
         for(;f.c.state==MOTOR_CAL_ACTIVE && at<400000;at+=200) assert(feed(&f,at,849));
         assert(f.c.state==MOTOR_CAL_WAIT_STOP && !f.motor_on);
         assert((uint32_t)(f.c.stop_requested_at-f.c.closing_load_at)>=200000u);
-        assert(confirm(&f,true) && f.c.original_load && !f.c.original_seat && !f.c.confirmed_candidates);
+        assert(confirm(&f,true) && f.c.original_load && !f.c.confirmed_candidates);
         high_until(&f,18000);assert(f.c.state==MOTOR_CAL_WAIT_STOP);
         assert(confirm(&f,false) && f.c.phase==MOTOR_CAL_CONFIRM_RETURN);
         high_until(&f,20000);
@@ -362,7 +362,7 @@ static void same_closing_signal(void)
         assert(f.c.seat.candidate && f.c.state==MOTOR_CAL_ACTIVE && f.motor_on);
         for(;f.c.state==MOTOR_CAL_ACTIVE && at<300000;at+=200) assert(feed(&f,at,940));
         assert(at>=200000 && f.c.state==MOTOR_CAL_WAIT_STOP && !f.motor_on);
-        assert(confirm(&f,true) && f.c.original_load && !f.c.original_seat);
+        assert(confirm(&f,true) && f.c.original_load);
         assert(!f.c.confirmed_candidates && !f.c.measured_legs);
         init(&f,0);f.c.phase=MOTOR_CAL_MEASURE;f.c.measured_close_kind=1;
         high_until(&f,20000);

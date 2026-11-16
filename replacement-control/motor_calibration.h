@@ -69,7 +69,6 @@ struct motor_calibration {
     bool closing_load_seen;
     uint8_t measured_close_kind;
     struct motor_seat seat;
-    bool original_seat;
     bool original_load;
     uint16_t original_load_mv;
 };

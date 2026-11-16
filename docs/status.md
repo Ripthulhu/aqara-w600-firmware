@@ -22,12 +22,17 @@ controller; the original radio is retained.
 
 ## Known issues in this custom firmware
 
+The current source fixes both issues below. They remain in the downloadable
+controller 50 release; the controller 51 test build has not been released.
+Its targeted checks pass, but the full simulation suite still has outdated
+calibration and clock tests.
+
 - If external-temperature updates stop for about five days, the timer can wrap
   and make the old reading appear fresh again. The valve can then request heat
-  from that stale reading. A software test reproduces this; it is not fixed yet.
+  from that stale reading.
 - A serial-link error during an active OTA transfer can freeze the controller
   until power is cycled. The motor stops, but the expected automatic restart
-  does not happen. This is reproduced in the compiled-image model.
+  does not happen.
 
 ## Temperature control
 
