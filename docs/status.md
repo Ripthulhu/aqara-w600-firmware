@@ -13,9 +13,7 @@
 - **Update trust:** OTA trusts the paired Zigbee network. Newer W600 images
   must retain OTA support and pass identity, size, vector, CRC and SHA256 checks.
   The hash detects corruption; updates are not cryptographically signed.
-- **Release quality:** experimental. Read the release's exact test coverage.
-  Software tests are not a replacement for mounted heat-delivery and shutoff
-  checks.
+- **Release quality:** experimental. Test coverage is listed in each release.
 
 Battery runtime, long-term wear, exact physical opening percentage, and power-loss
 rollback remain unqualified. Keep SWD recovery available. This replaces the valve
@@ -31,9 +29,8 @@ problem. Keep the external-temperature updates running.
 Below target it uses a simple proportional rule, with a minimum 20% opening
 request; at or above target it requests closure. Small target changes are
 accepted. These rules are covered by software tests, and mounted opening and
-shutoff have been checked. They do not guarantee a particular room-temperature
-accuracy or eliminate overshoot: radiator flow is not proportional to the
-reported opening percentage, and stored heat remains after closure.
+shutoff have been checked. Room-temperature regulation still needs testing on
+more radiator types.
 
 The community reports also include Aqara smart-schedule, clock/DST, group and
 Matter/Thread problems. Those are not qualified fixes in this Zigbee firmware.

@@ -31,9 +31,8 @@ The temperature-control changes address problems reported in the
 including the [external-sensor control issue](https://forum.aqara.com/t/w600-external-sensor-does-not-control-valve-firmware-issue/341137).
 Room control requires a separate temperature sensor.
 
-This is not a claim of zero temperature overshoot: a hot radiator still releases
-heat after the valve closes. Aqara smart schedules, clock/DST problems, group
-behaviour and Matter/Thread support are not covered by these fixes. See
+Aqara smart schedules, clock/DST problems, group behaviour and Matter/Thread
+support are not covered by these fixes. See
 [Compatibility and limits](docs/status.md).
 
 ## Install from stock
