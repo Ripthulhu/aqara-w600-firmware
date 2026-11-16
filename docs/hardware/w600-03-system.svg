@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1190.5511811023623pt" height="841.8897637795277pt" viewBox="0 0 1190.5511811023623 841.8897637795277">
+<rect width="100%" height="100%" fill="white"/>
+<text x="42" y="45" font-family="Arial,Helvetica,sans-serif" font-size="12" font-weight="700" fill="#176586" text-anchor="start">AQARA W600</text>
+<text x="42" y="79" font-family="Arial,Helvetica,sans-serif" font-size="25" font-weight="700" fill="#203344" text-anchor="start">Controller, radio, display and debug</text>
+<text x="42" y="103" font-family="Arial,Helvetica,sans-serif" font-size="11" font-weight="400" fill="#536777" text-anchor="start">Blue dashed links are established from firmware and functional tests; exact radio/display device-side pad numbers remain untraced.</text>
+<polyline points="42,117 1148.5511811023623,117" fill="none" stroke="#d9e2e8" stroke-width="1"/>
+<polyline points="42,788.8897637795277 1148.5511811023623,788.8897637795277" fill="none" stroke="#d9e2e8" stroke-width="1"/>
+<text x="42" y="810.8897637795277" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#536777" text-anchor="start">Partial reconstruction | CIU32L071CBT6 | 16 November 2026</text>
+<text x="1148.5511811023623" y="810.8897637795277" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#536777" text-anchor="end">3 / 4</text>
+<rect x="425" y="205" width="290" height="340" fill="#f8fafb" stroke="#203344"/>
+<text x="570" y="245" font-family="Arial,Helvetica,sans-serif" font-size="19" font-weight="700" fill="#203344" text-anchor="middle">U2</text>
+<text x="570" y="271" font-family="Arial,Helvetica,sans-serif" font-size="18" font-weight="700" fill="#203344" text-anchor="middle">CIU32L071CBT6</text>
+<text x="570" y="297" font-family="Arial,Helvetica,sans-serif" font-size="12" font-weight="400" fill="#203344" text-anchor="middle">Cortex-M0+ | LQFP48</text>
+<text x="570" y="320" font-family="Arial,Helvetica,sans-serif" font-size="11" font-weight="400" fill="#203344" text-anchor="middle">128 KiB flash | 28 KiB SRAM</text>
+<rect x="60" y="202" width="228" height="150" fill="#ffffff" stroke="#203344"/>
+<text x="174" y="231" font-family="Arial,Helvetica,sans-serif" font-size="15" font-weight="700" fill="#203344" text-anchor="middle">Front controls</text>
+<text x="74" y="265" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">Button</text>
+<polyline points="288,260 425,260" fill="none" stroke="#176586" stroke-width="1.6" stroke-dasharray="5,4"/>
+<text x="355" y="253" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="middle">PB8 / lead 47</text>
+<text x="74" y="299" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">Clockwise dial pulse</text>
+<polyline points="288,294 425,294" fill="none" stroke="#176586" stroke-width="1.6" stroke-dasharray="5,4"/>
+<text x="355" y="287" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="middle">PA2 / lead 13</text>
+<text x="74" y="333" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">Counterclockwise pulse</text>
+<polyline points="288,328 425,328" fill="none" stroke="#176586" stroke-width="1.6" stroke-dasharray="5,4"/>
+<text x="355" y="321" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="middle">PB1 / lead 20</text>
+<text x="64" y="378" font-family="Arial,Helvetica,sans-serif" font-size="11" font-weight="400" fill="#536777" text-anchor="start">Inputs are active low.</text>
+<text x="64" y="395" font-family="Arial,Helvetica,sans-serif" font-size="11" font-weight="400" fill="#536777" text-anchor="start">Dial direction follows the later physical test,</text>
+<text x="64" y="412" font-family="Arial,Helvetica,sans-serif" font-size="11" font-weight="400" fill="#536777" text-anchor="start">correcting the first stock-code interpretation.</text>
+<rect x="920" y="190" width="218" height="205" fill="#ffffff" stroke="#203344"/>
+<text x="1029" y="222" font-family="Arial,Helvetica,sans-serif" font-size="17" font-weight="700" fill="#203344" text-anchor="middle">MG24 radio</text>
+<text x="1029" y="244" font-family="Arial,Helvetica,sans-serif" font-size="11" font-weight="400" fill="#203344" text-anchor="middle">Original Zigbee firmware</text>
+<polyline points="715,280 920,280" fill="none" stroke="#176586" stroke-width="1.6" stroke-dasharray="5,4"/>
+<text x="817" y="272" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="middle">PD1 / 29 TX -&gt; radio RX</text>
+<polyline points="715,314 920,314" fill="none" stroke="#176586" stroke-width="1.6" stroke-dasharray="5,4"/>
+<text x="817" y="306" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="middle">PD0 / 28 RX &lt;- radio TX</text>
+<text x="817" y="344" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="middle">UART3: 115200, 8N1</text>
+<polyline points="715,375 890,375 890,361 920,361" fill="none" stroke="#176586" stroke-width="1.6" stroke-dasharray="5,4"/>
+<text x="812" y="368" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="middle">PA10 / 33 wake in (low)</text>
+<polyline points="715,415 875,415 875,385 920,385" fill="none" stroke="#176586" stroke-width="1.6" stroke-dasharray="5,4"/>
+<text x="805" y="434" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="middle">PA11 / 34 wake out (low)</text>
+<rect x="920" y="475" width="218" height="100" fill="#ffffff" stroke="#203344"/>
+<text x="1029" y="505" font-family="Arial,Helvetica,sans-serif" font-size="16" font-weight="700" fill="#203344" text-anchor="middle">U6 - TM1652</text>
+<text x="1029" y="530" font-family="Arial,Helvetica,sans-serif" font-size="11" font-weight="400" fill="#203344" text-anchor="middle">LED display driver</text>
+<polyline points="715,505 920,505" fill="none" stroke="#176586" stroke-width="1.6" stroke-dasharray="5,4"/>
+<text x="817" y="492" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="middle">PB6 / 45 UART2 TX</text>
+<text x="817" y="528" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="middle">19200, 8O1; open-drain</text>
+<rect x="60" y="490" width="228" height="105" fill="#ffffff" stroke="#99651c" stroke-dasharray="5,4"/>
+<text x="174" y="521" font-family="Arial,Helvetica,sans-serif" font-size="14" font-weight="700" fill="#203344" text-anchor="middle">Temperature front-end</text>
+<text x="174" y="546" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#536777" text-anchor="middle">Resistor / sensor topology untraced</text>
+<polyline points="288,520 425,520" fill="none" stroke="#176586" stroke-width="1.6" stroke-dasharray="5,4"/>
+<text x="355" y="507" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="middle">PA1 / 12 ADC_IN0</text>
+<polyline points="288,570 330,570 330,550 425,550" fill="none" stroke="#176586" stroke-width="1.6" stroke-dasharray="5,4"/>
+<text x="355" y="590" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="middle">PB9 / 48 control</text>
+<rect x="425" y="620" width="713" height="120" fill="#f8fafb" stroke="#203344"/>
+<text x="445" y="649" font-family="Arial,Helvetica,sans-serif" font-size="14" font-weight="700" fill="#203344" text-anchor="start">Debug and supply connections</text>
+<text x="445" y="674" font-family="Arial,Helvetica,sans-serif" font-size="11" font-weight="400" fill="#203344" text-anchor="start">PA3 / lead 14 -&gt; pad P16: UART4 diagnostic TX, 9600 8N1.</text>
+<text x="445" y="692" font-family="Arial,Helvetica,sans-serif" font-size="11" font-weight="400" fill="#203344" text-anchor="start">NRST / lead 9 -&gt; pad P12: active-low reset. P29 was a rejected candidate.</text>
+<text x="445" y="710" font-family="Arial,Helvetica,sans-serif" font-size="11" font-weight="400" fill="#203344" text-anchor="start">PA13 / lead 36: SWDIO. PA14 / lead 37: SWCLK. G pad: common ground.</text>
+<text x="445" y="728" font-family="Arial,Helvetica,sans-serif" font-size="11" font-weight="400" fill="#203344" text-anchor="start">C15 connects MCU lead 30 (VDD/VDDA) to lead 31 (VSS/VSSA); capacitance unknown.</text>
+<text x="60" y="663" font-family="Arial,Helvetica,sans-serif" font-size="11" font-weight="400" fill="#536777" text-anchor="start">PA4 / 15, PA5 / 16, PB0 / 19:</text>
+<text x="60" y="680" font-family="Arial,Helvetica,sans-serif" font-size="11" font-weight="400" fill="#536777" text-anchor="start">display / power-group control in code.</text>
+<text x="60" y="697" font-family="Arial,Helvetica,sans-serif" font-size="11" font-weight="400" fill="#536777" text-anchor="start">Complete rail connections remain untraced.</text>
+</svg>

@@ -1,0 +1,169 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1190.5511811023623pt" height="841.8897637795277pt" viewBox="0 0 1190.5511811023623 841.8897637795277">
+<rect width="100%" height="100%" fill="white"/>
+<text x="42" y="45" font-family="Arial,Helvetica,sans-serif" font-size="12" font-weight="700" fill="#176586" text-anchor="start">AQARA W600</text>
+<text x="42" y="79" font-family="Arial,Helvetica,sans-serif" font-size="25" font-weight="700" fill="#203344" text-anchor="start">Pin reference and reconstruction notes</text>
+<text x="42" y="103" font-family="Arial,Helvetica,sans-serif" font-size="11" font-weight="400" fill="#536777" text-anchor="start">Package leads below use the HED CIU32L071 LQFP48 pinout, not the different STM32L071 pinout and not PCB Pxx pad labels.</text>
+<polyline points="42,117 1148.5511811023623,117" fill="none" stroke="#d9e2e8" stroke-width="1"/>
+<polyline points="42,788.8897637795277 1148.5511811023623,788.8897637795277" fill="none" stroke="#d9e2e8" stroke-width="1"/>
+<text x="42" y="810.8897637795277" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#536777" text-anchor="start">Partial reconstruction | CIU32L071CBT6 | 16 November 2026</text>
+<text x="1148.5511811023623" y="810.8897637795277" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#536777" text-anchor="end">4 / 4</text>
+<text x="55" y="149" font-family="Arial,Helvetica,sans-serif" font-size="11" font-weight="700" fill="#203344" text-anchor="start">Lead</text>
+<text x="115" y="149" font-family="Arial,Helvetica,sans-serif" font-size="11" font-weight="700" fill="#203344" text-anchor="start">Signal</text>
+<text x="205" y="149" font-family="Arial,Helvetica,sans-serif" font-size="11" font-weight="700" fill="#203344" text-anchor="start">Use</text>
+<text x="470" y="149" font-family="Arial,Helvetica,sans-serif" font-size="11" font-weight="700" fill="#203344" text-anchor="start">Evidence</text>
+<text x="55" y="174" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">6,31</text>
+<text x="115" y="174" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">VSS/VSSA</text>
+<text x="205" y="174" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">Ground; C15 reaches lead 31</text>
+<text x="470" y="174" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">DS + measured</text>
+<polyline points="50,181 665,181" fill="none" stroke="#d9e2e8" stroke-width="0.5"/>
+<text x="55" y="196" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">7,30</text>
+<text x="115" y="196" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">VDD/VDDA</text>
+<text x="205" y="196" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">Supply; C15 reaches lead 30</text>
+<text x="470" y="196" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">DS + measured</text>
+<polyline points="50,203 665,203" fill="none" stroke="#d9e2e8" stroke-width="0.5"/>
+<text x="55" y="218" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">9</text>
+<text x="115" y="218" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">NRST</text>
+<text x="205" y="218" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">P12 reset pad</text>
+<text x="470" y="218" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">Measured + tested</text>
+<polyline points="50,225 665,225" fill="none" stroke="#d9e2e8" stroke-width="0.5"/>
+<text x="55" y="240" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">12</text>
+<text x="115" y="240" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">PA1</text>
+<text x="205" y="240" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">Local-temperature ADC_IN0</text>
+<text x="470" y="240" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">Firmware</text>
+<polyline points="50,247 665,247" fill="none" stroke="#d9e2e8" stroke-width="0.5"/>
+<text x="55" y="262" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">13</text>
+<text x="115" y="262" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">PA2</text>
+<text x="205" y="262" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">Clockwise dial input</text>
+<text x="470" y="262" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">User + live test</text>
+<polyline points="50,269 665,269" fill="none" stroke="#d9e2e8" stroke-width="0.5"/>
+<text x="55" y="284" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">14</text>
+<text x="115" y="284" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">PA3</text>
+<text x="205" y="284" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">P16 diagnostic UART TX</text>
+<text x="470" y="284" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">Measured + capture</text>
+<polyline points="50,291 665,291" fill="none" stroke="#d9e2e8" stroke-width="0.5"/>
+<text x="55" y="306" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">15</text>
+<text x="115" y="306" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">PA4</text>
+<text x="205" y="306" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">Display / power control</text>
+<text x="470" y="306" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">Firmware; rail unknown</text>
+<polyline points="50,313 665,313" fill="none" stroke="#d9e2e8" stroke-width="0.5"/>
+<text x="55" y="328" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">16</text>
+<text x="115" y="328" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">PA5</text>
+<text x="205" y="328" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">Power group</text>
+<text x="470" y="328" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">Firmware; rail unknown</text>
+<polyline points="50,335 665,335" fill="none" stroke="#d9e2e8" stroke-width="0.5"/>
+<text x="55" y="350" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">19</text>
+<text x="115" y="350" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">PB0</text>
+<text x="205" y="350" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">Power group</text>
+<text x="470" y="350" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">Firmware; rail unknown</text>
+<polyline points="50,357 665,357" fill="none" stroke="#d9e2e8" stroke-width="0.5"/>
+<text x="55" y="372" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">20</text>
+<text x="115" y="372" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">PB1</text>
+<text x="205" y="372" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">Counterclockwise dial input</text>
+<text x="470" y="372" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">User + live test</text>
+<polyline points="50,379 665,379" fill="none" stroke="#d9e2e8" stroke-width="0.5"/>
+<text x="55" y="394" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">24</text>
+<text x="115" y="394" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">PB12</text>
+<text x="205" y="394" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">Q5 gate, R28 pull-up</text>
+<text x="470" y="394" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">Measured + marking</text>
+<polyline points="50,401 665,401" fill="none" stroke="#d9e2e8" stroke-width="0.5"/>
+<text x="55" y="416" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">25</text>
+<text x="115" y="416" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">PB13</text>
+<text x="205" y="416" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">R4/R8 junction, ADC_IN16</text>
+<text x="470" y="416" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">Measured + firmware</text>
+<polyline points="50,423 665,423" fill="none" stroke="#d9e2e8" stroke-width="0.5"/>
+<text x="55" y="438" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">26</text>
+<text x="115" y="438" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">PB14</text>
+<text x="205" y="438" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">U1 bottom-right</text>
+<text x="470" y="438" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">Measured</text>
+<polyline points="50,445 665,445" fill="none" stroke="#d9e2e8" stroke-width="0.5"/>
+<text x="55" y="460" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">27</text>
+<text x="115" y="460" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">PB15</text>
+<text x="205" y="460" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">U1 top-right</text>
+<text x="470" y="460" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">Measured</text>
+<polyline points="50,467 665,467" fill="none" stroke="#d9e2e8" stroke-width="0.5"/>
+<text x="55" y="482" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">28</text>
+<text x="115" y="482" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">PD0</text>
+<text x="205" y="482" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">UART3 RX from radio</text>
+<text x="470" y="482" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">Firmware + function</text>
+<polyline points="50,489 665,489" fill="none" stroke="#d9e2e8" stroke-width="0.5"/>
+<text x="55" y="504" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">29</text>
+<text x="115" y="504" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">PD1</text>
+<text x="205" y="504" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">UART3 TX to radio</text>
+<text x="470" y="504" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">Firmware + function</text>
+<polyline points="50,511 665,511" fill="none" stroke="#d9e2e8" stroke-width="0.5"/>
+<text x="55" y="526" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">33</text>
+<text x="115" y="526" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">PA10</text>
+<text x="205" y="526" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">Incoming radio wake</text>
+<text x="470" y="526" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">Firmware</text>
+<polyline points="50,533 665,533" fill="none" stroke="#d9e2e8" stroke-width="0.5"/>
+<text x="55" y="548" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">34</text>
+<text x="115" y="548" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">PA11</text>
+<text x="205" y="548" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">Outgoing radio wake</text>
+<text x="470" y="548" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">Firmware</text>
+<polyline points="50,555 665,555" fill="none" stroke="#d9e2e8" stroke-width="0.5"/>
+<text x="55" y="570" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">36</text>
+<text x="115" y="570" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">PA13</text>
+<text x="205" y="570" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">SWDIO</text>
+<text x="470" y="570" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">DS + debug tests</text>
+<polyline points="50,577 665,577" fill="none" stroke="#d9e2e8" stroke-width="0.5"/>
+<text x="55" y="592" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">37</text>
+<text x="115" y="592" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">PA14</text>
+<text x="205" y="592" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">SWCLK</text>
+<text x="470" y="592" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">DS + debug tests</text>
+<polyline points="50,599 665,599" fill="none" stroke="#d9e2e8" stroke-width="0.5"/>
+<text x="55" y="614" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">39</text>
+<text x="115" y="614" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">PA15</text>
+<text x="205" y="614" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">R9 -&gt; Q2 base; grounds M_BLACK</text>
+<text x="470" y="614" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">Measured + marking</text>
+<polyline points="50,621 665,621" fill="none" stroke="#d9e2e8" stroke-width="0.5"/>
+<text x="55" y="636" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">40</text>
+<text x="115" y="636" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">PC10</text>
+<text x="205" y="636" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">R10 -&gt; Q3 base; grounds M_RED</text>
+<text x="470" y="636" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">Measured + marking</text>
+<polyline points="50,643 665,643" fill="none" stroke="#d9e2e8" stroke-width="0.5"/>
+<text x="55" y="658" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">45</text>
+<text x="115" y="658" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">PB6</text>
+<text x="205" y="658" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">UART2 TX to display</text>
+<text x="470" y="658" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">Firmware + function</text>
+<polyline points="50,665 665,665" fill="none" stroke="#d9e2e8" stroke-width="0.5"/>
+<text x="55" y="680" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">47</text>
+<text x="115" y="680" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">PB8</text>
+<text x="205" y="680" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">Main button</text>
+<text x="470" y="680" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">Firmware + function</text>
+<polyline points="50,687 665,687" fill="none" stroke="#d9e2e8" stroke-width="0.5"/>
+<text x="55" y="702" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">48</text>
+<text x="115" y="702" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">PB9</text>
+<text x="205" y="702" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">Local-temperature front-end control</text>
+<text x="470" y="702" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">Firmware</text>
+<polyline points="50,709 665,709" fill="none" stroke="#d9e2e8" stroke-width="0.5"/>
+<text x="715" y="151" font-family="Arial,Helvetica,sans-serif" font-size="16" font-weight="700" fill="#203344" text-anchor="start">How the motor is read</text>
+<text x="715" y="179" font-family="Arial,Helvetica,sans-serif" font-size="11" font-weight="400" fill="#536777" text-anchor="start">The MCU briefly removes drive, grounds one terminal</text>
+<text x="715" y="196" font-family="Arial,Helvetica,sans-serif" font-size="11" font-weight="400" fill="#536777" text-anchor="start">through Q2 or Q3, allows settling, then samples PB13.</text>
+<text x="715" y="213" font-family="Arial,Helvetica,sans-serif" font-size="11" font-weight="400" fill="#536777" text-anchor="start">Back-EMF indicates motor rotation. It does not directly</text>
+<text x="715" y="230" font-family="Arial,Helvetica,sans-serif" font-size="11" font-weight="400" fill="#536777" text-anchor="start">measure plunger position or motor current.</text>
+<text x="715" y="247" font-family="Arial,Helvetica,sans-serif" font-size="11" font-weight="400" fill="#536777" text-anchor="start"></text>
+<text x="715" y="264" font-family="Arial,Helvetica,sans-serif" font-size="11" font-weight="400" fill="#536777" text-anchor="start">A slipping mechanism can keep the motor turning at</text>
+<text x="715" y="281" font-family="Arial,Helvetica,sans-serif" font-size="11" font-weight="400" fill="#536777" text-anchor="start">the end of travel. The replacement combines feedback</text>
+<text x="715" y="298" font-family="Arial,Helvetica,sans-serif" font-size="11" font-weight="400" fill="#536777" text-anchor="start">with bounded movement and back-off/return checks.</text>
+<text x="715" y="348" font-family="Arial,Helvetica,sans-serif" font-size="16" font-weight="700" fill="#203344" text-anchor="start">Still missing from the circuit</text>
+<text x="715" y="376" font-family="Arial,Helvetica,sans-serif" font-size="11" font-weight="400" fill="#536777" text-anchor="start">Complete supply-converter and rail routing.</text>
+<text x="715" y="393" font-family="Arial,Helvetica,sans-serif" font-size="11" font-weight="400" fill="#536777" text-anchor="start">Exact D1/D2 part numbers and diode technology.</text>
+<text x="715" y="410" font-family="Arial,Helvetica,sans-serif" font-size="11" font-weight="400" fill="#536777" text-anchor="start">Exact Q5 and Q2/Q3 manufacturer.</text>
+<text x="715" y="427" font-family="Arial,Helvetica,sans-serif" font-size="11" font-weight="400" fill="#536777" text-anchor="start">R3/R5, C6/C7 and the temperature sensor network.</text>
+<text x="715" y="444" font-family="Arial,Helvetica,sans-serif" font-size="11" font-weight="400" fill="#536777" text-anchor="start">Exact radio-module pads, display input pin and U4.</text>
+<text x="715" y="461" font-family="Arial,Helvetica,sans-serif" font-size="11" font-weight="400" fill="#536777" text-anchor="start">A complete manufacturer truth table for SA116L.</text>
+<text x="715" y="513" font-family="Arial,Helvetica,sans-serif" font-size="16" font-weight="700" fill="#203344" text-anchor="start">Source record</text>
+<text x="715" y="541" font-family="Arial,Helvetica,sans-serif" font-size="11" font-weight="400" fill="#536777" text-anchor="start">MOTOR-CONTINUITY-20261108.txt: measured nets.</text>
+<text x="715" y="558" font-family="Arial,Helvetica,sans-serif" font-size="11" font-weight="400" fill="#536777" text-anchor="start">DRIVER-TOPOLOGY-EVIDENCE-20261107.txt: devices.</text>
+<text x="715" y="575" font-family="Arial,Helvetica,sans-serif" font-size="11" font-weight="400" fill="#536777" text-anchor="start">UART-PAD-TRACING-20261107.txt: P16 and UART.</text>
+<text x="715" y="592" font-family="Arial,Helvetica,sans-serif" font-size="11" font-weight="400" fill="#536777" text-anchor="start">PI-BUTTON-WIRING.txt: corrected P12 reset pad.</text>
+<text x="715" y="609" font-family="Arial,Helvetica,sans-serif" font-size="11" font-weight="400" fill="#536777" text-anchor="start">REFERENCE-MAP.txt and DS1003 Rev2.1 Figure 3-3.</text>
+<text x="715" y="626" font-family="Arial,Helvetica,sans-serif" font-size="11" font-weight="400" fill="#536777" text-anchor="start">firmware/app.c: tested dial direction correction.</text>
+<text x="715" y="643" font-family="Arial,Helvetica,sans-serif" font-size="11" font-weight="400" fill="#536777" text-anchor="start">firmware/radio.c, display_tx.c, motor_service.c.</text>
+<text x="715" y="660" font-family="Arial,Helvetica,sans-serif" font-size="11" font-weight="400" fill="#536777" text-anchor="start">Photos 24853 / 24858: diode bands and markings.</text>
+<text x="715" y="677" font-family="Arial,Helvetica,sans-serif" font-size="11" font-weight="400" fill="#536777" text-anchor="start">Belling BLM2305 v2.3: 2305 marking, G1/S2/D3.</text>
+<text x="715" y="694" font-family="Arial,Helvetica,sans-serif" font-size="11" font-weight="400" fill="#536777" text-anchor="start">Semiware S8050 Rev A2.0: J3Y marking, B1/E2/C3.</text>
+<text x="715" y="711" font-family="Arial,Helvetica,sans-serif" font-size="11" font-weight="400" fill="#536777" text-anchor="start">Transistor identities are marking/circuit matches;</text>
+<text x="715" y="728" font-family="Arial,Helvetica,sans-serif" font-size="11" font-weight="400" fill="#536777" text-anchor="start">connections are from the saved continuity checks.</text>
+<text x="715" y="747" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#536777" text-anchor="start">Boards: ST363LZBDR_A1 (main), _B1 (display/radio).</text>
+</svg>

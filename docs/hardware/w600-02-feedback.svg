@@ -1,0 +1,131 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1190.5511811023623pt" height="841.8897637795277pt" viewBox="0 0 1190.5511811023623 841.8897637795277">
+<rect width="100%" height="100%" fill="white"/>
+<text x="42" y="45" font-family="Arial,Helvetica,sans-serif" font-size="12" font-weight="700" fill="#176586" text-anchor="start">AQARA W600</text>
+<text x="42" y="79" font-family="Arial,Helvetica,sans-serif" font-size="25" font-weight="700" fill="#203344" text-anchor="start">Motor feedback and sampled states</text>
+<text x="42" y="103" font-family="Arial,Helvetica,sans-serif" font-size="11" font-weight="400" fill="#536777" text-anchor="start">The only traced motor feedback input is PB13 / ADC_IN16. There is no motor encoder or plunger-position sensor in this map.</text>
+<polyline points="42,117 1148.5511811023623,117" fill="none" stroke="#d9e2e8" stroke-width="1"/>
+<polyline points="42,788.8897637795277 1148.5511811023623,788.8897637795277" fill="none" stroke="#d9e2e8" stroke-width="1"/>
+<text x="42" y="810.8897637795277" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#536777" text-anchor="start">Partial reconstruction | CIU32L071CBT6 | 16 November 2026</text>
+<text x="1148.5511811023623" y="810.8897637795277" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#536777" text-anchor="end">2 / 4</text>
+<text x="62" y="182" font-family="Arial,Helvetica,sans-serif" font-size="11" font-weight="700" fill="#176586" text-anchor="start">M_RED</text>
+<polyline points="125,178 175,178" fill="none" stroke="#203344" stroke-width="1.6"/>
+<polyline points="175,178.0 183,178.0" fill="none" stroke="#203344" stroke-width="1.6"/>
+<rect x="183" y="167" width="99" height="22" fill="#ffffff" stroke="#203344"/>
+<polyline points="282,178.0 290,178.0" fill="none" stroke="#203344" stroke-width="1.6"/>
+<text x="232.5" y="158" font-family="Arial,Helvetica,sans-serif" font-size="11" font-weight="400" fill="#203344" text-anchor="middle">R8 - 91 kohm</text>
+<polyline points="290,178 392,178 392,278" fill="none" stroke="#203344" stroke-width="1.6"/>
+<circle cx="392" cy="178" r="3" fill="#203344"/>
+<text x="62" y="282" font-family="Arial,Helvetica,sans-serif" font-size="11" font-weight="700" fill="#176586" text-anchor="start">M_BLACK</text>
+<polyline points="135,278 175,278" fill="none" stroke="#203344" stroke-width="1.6"/>
+<polyline points="175,278.0 183,278.0" fill="none" stroke="#203344" stroke-width="1.6"/>
+<rect x="183" y="267" width="99" height="22" fill="#ffffff" stroke="#203344"/>
+<polyline points="282,278.0 290,278.0" fill="none" stroke="#203344" stroke-width="1.6"/>
+<text x="232.5" y="258" font-family="Arial,Helvetica,sans-serif" font-size="11" font-weight="400" fill="#203344" text-anchor="middle">R4 - 91 kohm</text>
+<polyline points="290,278 392,278" fill="none" stroke="#203344" stroke-width="1.6"/>
+<circle cx="392" cy="278" r="3" fill="#203344"/>
+<circle cx="392" cy="228" r="3" fill="#203344"/>
+<polyline points="392,228 505,228" fill="none" stroke="#203344" stroke-width="1.6"/>
+<text x="505" y="218" font-family="Arial,Helvetica,sans-serif" font-size="11" font-weight="700" fill="#176586" text-anchor="end">PB13 / lead 25</text>
+<text x="505" y="246" font-family="Arial,Helvetica,sans-serif" font-size="11" font-weight="400" fill="#203344" text-anchor="end">ADC_IN16</text>
+<circle cx="710" cy="225" r="30" fill="none" stroke="#203344" stroke-width="1.5"/>
+<polyline points="697,207 697,243" fill="none" stroke="#203344" stroke-width="1.6"/>
+<polyline points="650,225 697,225" fill="none" stroke="#203344" stroke-width="1.6"/>
+<polyline points="697,215 727,193 727,173" fill="none" stroke="#203344" stroke-width="1.6"/>
+<polyline points="697,235 727,257 727,277" fill="none" stroke="#203344" stroke-width="1.6"/>
+<polyline points="711,245 724,255" fill="none" stroke="#203344" stroke-width="1.6"/>
+<polyline points="716.0967687929015,253.75946121094788 724,255 720.7737433515117,247.67939428475452" fill="none" stroke="#203344" stroke-width="1.6"/>
+<text x="757" y="207" font-family="Arial,Helvetica,sans-serif" font-size="12" font-weight="700" fill="#203344" text-anchor="start">Q2 - J3Y</text>
+<text x="757" y="226" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">S8050-type NPN</text>
+<polyline points="727,150 727,173" fill="none" stroke="#203344" stroke-width="1.6"/>
+<text x="727" y="139" font-family="Arial,Helvetica,sans-serif" font-size="11" font-weight="700" fill="#176586" text-anchor="middle">M_BLACK</text>
+<text x="733" y="176" font-family="Arial,Helvetica,sans-serif" font-size="9" font-weight="400" fill="#536777" text-anchor="start">C / 3</text>
+<polyline points="510,275.0 518,275.0" fill="none" stroke="#203344" stroke-width="1.6"/>
+<rect x="518" y="264" width="99" height="22" fill="#ffffff" stroke="#203344"/>
+<polyline points="617,275.0 625,275.0" fill="none" stroke="#203344" stroke-width="1.6"/>
+<text x="567.5" y="255" font-family="Arial,Helvetica,sans-serif" font-size="11" font-weight="400" fill="#203344" text-anchor="middle">R9 - 1 kohm</text>
+<polyline points="625,275 645,275 645,225 650,225" fill="none" stroke="#203344" stroke-width="1.6"/>
+<text x="510" y="320" font-family="Arial,Helvetica,sans-serif" font-size="11" font-weight="700" fill="#176586" text-anchor="start">PA15 / lead 39</text>
+<text x="659" y="212" font-family="Arial,Helvetica,sans-serif" font-size="9" font-weight="400" fill="#536777" text-anchor="start">B / 1</text>
+<polyline points="727,277 727,305" fill="none" stroke="#203344" stroke-width="1.6"/>
+<polyline points="727,305 727,315" fill="none" stroke="#203344" stroke-width="1.6"/>
+<polyline points="715,315 739,315" fill="none" stroke="#203344" stroke-width="1.6"/>
+<polyline points="719,320 735,320" fill="none" stroke="#203344" stroke-width="1.6"/>
+<polyline points="723,325 731,325" fill="none" stroke="#203344" stroke-width="1.6"/>
+<text x="736" y="285" font-family="Arial,Helvetica,sans-serif" font-size="9" font-weight="400" fill="#536777" text-anchor="start">E / 2</text>
+<text x="710" y="356" font-family="Arial,Helvetica,sans-serif" font-size="9" font-weight="400" fill="#536777" text-anchor="middle">Grounds this motor lead when the MCU output is high.</text>
+<circle cx="1030" cy="225" r="30" fill="none" stroke="#203344" stroke-width="1.5"/>
+<polyline points="1017,207 1017,243" fill="none" stroke="#203344" stroke-width="1.6"/>
+<polyline points="970,225 1017,225" fill="none" stroke="#203344" stroke-width="1.6"/>
+<polyline points="1017,215 1047,193 1047,173" fill="none" stroke="#203344" stroke-width="1.6"/>
+<polyline points="1017,235 1047,257 1047,277" fill="none" stroke="#203344" stroke-width="1.6"/>
+<polyline points="1031,245 1044,255" fill="none" stroke="#203344" stroke-width="1.6"/>
+<polyline points="1036.0967687929015,253.75946121094788 1044,255 1040.7737433515117,247.67939428475452" fill="none" stroke="#203344" stroke-width="1.6"/>
+<text x="1077" y="207" font-family="Arial,Helvetica,sans-serif" font-size="12" font-weight="700" fill="#203344" text-anchor="start">Q3 - J3Y</text>
+<text x="1077" y="226" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">S8050-type NPN</text>
+<polyline points="1047,150 1047,173" fill="none" stroke="#203344" stroke-width="1.6"/>
+<text x="1047" y="139" font-family="Arial,Helvetica,sans-serif" font-size="11" font-weight="700" fill="#176586" text-anchor="middle">M_RED</text>
+<text x="1053" y="176" font-family="Arial,Helvetica,sans-serif" font-size="9" font-weight="400" fill="#536777" text-anchor="start">C / 3</text>
+<polyline points="830,275.0 838,275.0" fill="none" stroke="#203344" stroke-width="1.6"/>
+<rect x="838" y="264" width="99" height="22" fill="#ffffff" stroke="#203344"/>
+<polyline points="937,275.0 945,275.0" fill="none" stroke="#203344" stroke-width="1.6"/>
+<text x="887.5" y="255" font-family="Arial,Helvetica,sans-serif" font-size="11" font-weight="400" fill="#203344" text-anchor="middle">R10 - 1 kohm</text>
+<polyline points="945,275 965,275 965,225 970,225" fill="none" stroke="#203344" stroke-width="1.6"/>
+<text x="830" y="320" font-family="Arial,Helvetica,sans-serif" font-size="11" font-weight="700" fill="#176586" text-anchor="start">PC10 / lead 40</text>
+<text x="979" y="212" font-family="Arial,Helvetica,sans-serif" font-size="9" font-weight="400" fill="#536777" text-anchor="start">B / 1</text>
+<polyline points="1047,277 1047,305" fill="none" stroke="#203344" stroke-width="1.6"/>
+<polyline points="1047,305 1047,315" fill="none" stroke="#203344" stroke-width="1.6"/>
+<polyline points="1035,315 1059,315" fill="none" stroke="#203344" stroke-width="1.6"/>
+<polyline points="1039,320 1055,320" fill="none" stroke="#203344" stroke-width="1.6"/>
+<polyline points="1043,325 1051,325" fill="none" stroke="#203344" stroke-width="1.6"/>
+<text x="1056" y="285" font-family="Arial,Helvetica,sans-serif" font-size="9" font-weight="400" fill="#536777" text-anchor="start">E / 2</text>
+<text x="1030" y="356" font-family="Arial,Helvetica,sans-serif" font-size="9" font-weight="400" fill="#536777" text-anchor="middle">Grounds this motor lead when the MCU output is high.</text>
+<text x="65" y="344" font-family="Arial,Helvetica,sans-serif" font-size="11" font-weight="400" fill="#536777" text-anchor="start">Both 91-kohm resistors join the same ADC node.</text>
+<text x="65" y="361" font-family="Arial,Helvetica,sans-serif" font-size="11" font-weight="400" fill="#536777" text-anchor="start">C15 is not on this node; it is supply decoupling.</text>
+<polyline points="42,385 1148.5511811023623,385" fill="none" stroke="#d9e2e8" stroke-width="1"/>
+<text x="60" y="414" font-family="Arial,Helvetica,sans-serif" font-size="17" font-weight="700" fill="#203344" text-anchor="start">Tested control combinations</text>
+<text x="65" y="449" font-family="Arial,Helvetica,sans-serif" font-size="11" font-weight="700" fill="#203344" text-anchor="start">State</text>
+<text x="365" y="449" font-family="Arial,Helvetica,sans-serif" font-size="11" font-weight="700" fill="#203344" text-anchor="start">PB14</text>
+<text x="470" y="449" font-family="Arial,Helvetica,sans-serif" font-size="11" font-weight="700" fill="#203344" text-anchor="start">PB15</text>
+<text x="575" y="449" font-family="Arial,Helvetica,sans-serif" font-size="11" font-weight="700" fill="#203344" text-anchor="start">PA15 / Q2</text>
+<text x="715" y="449" font-family="Arial,Helvetica,sans-serif" font-size="11" font-weight="700" fill="#203344" text-anchor="start">PC10 / Q3</text>
+<text x="870" y="449" font-family="Arial,Helvetica,sans-serif" font-size="11" font-weight="700" fill="#203344" text-anchor="start">Observed use</text>
+<polyline points="60,490 1125,490" fill="none" stroke="#d9e2e8" stroke-width="0.6"/>
+<text x="65" y="478" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">Stopped</text>
+<text x="365" y="478" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">H</text>
+<text x="470" y="478" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">H</text>
+<text x="575" y="478" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">L</text>
+<text x="715" y="478" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">L</text>
+<text x="870" y="478" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">Motor stops; contacts read 0 V</text>
+<polyline points="60,524 1125,524" fill="none" stroke="#d9e2e8" stroke-width="0.6"/>
+<text x="65" y="512" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">Drive DIR1</text>
+<text x="365" y="512" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">H</text>
+<text x="470" y="512" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">L</text>
+<text x="575" y="512" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">L</text>
+<text x="715" y="512" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">L</text>
+<text x="870" y="512" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">Retract / open; negative red-black voltage</text>
+<polyline points="60,558 1125,558" fill="none" stroke="#d9e2e8" stroke-width="0.6"/>
+<text x="65" y="546" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">Sample DIR1</text>
+<text x="365" y="546" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">L</text>
+<text x="470" y="546" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">L</text>
+<text x="575" y="546" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">L</text>
+<text x="715" y="546" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">H</text>
+<text x="870" y="546" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">Q3 grounds M_RED; sample PB13</text>
+<polyline points="60,592 1125,592" fill="none" stroke="#d9e2e8" stroke-width="0.6"/>
+<text x="65" y="580" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">Drive DIR2</text>
+<text x="365" y="580" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">L</text>
+<text x="470" y="580" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">H</text>
+<text x="575" y="580" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">L</text>
+<text x="715" y="580" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">L</text>
+<text x="870" y="580" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">Extend / close; positive red-black voltage</text>
+<polyline points="60,626 1125,626" fill="none" stroke="#d9e2e8" stroke-width="0.6"/>
+<text x="65" y="614" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">Sample DIR2</text>
+<text x="365" y="614" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">L</text>
+<text x="470" y="614" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">L</text>
+<text x="575" y="614" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">H</text>
+<text x="715" y="614" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">L</text>
+<text x="870" y="614" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="400" fill="#203344" text-anchor="start">Q2 grounds M_BLACK; sample PB13</text>
+<text x="65" y="677" font-family="Arial,Helvetica,sans-serif" font-size="11" font-weight="400" fill="#536777" text-anchor="start">H/L describe the energized or sampling segment; TIM4 bounds the drive pulses in the replacement firmware.</text>
+<text x="65" y="694" font-family="Arial,Helvetica,sans-serif" font-size="11" font-weight="400" fill="#536777" text-anchor="start">With equal 91-kohm resistors, PB13 is approximately (V(M_RED) + V(M_BLACK)) / 2 before ADC loading.</text>
+<text x="65" y="711" font-family="Arial,Helvetica,sans-serif" font-size="11" font-weight="400" fill="#536777" text-anchor="start">The selected grounded terminal makes the off-drive sample useful for back-EMF sensing. This is not a current shunt.</text>
+<text x="65" y="728" font-family="Arial,Helvetica,sans-serif" font-size="11" font-weight="400" fill="#536777" text-anchor="start">Recorded unloaded peaks: DIR1 -3.302 V; DIR2 +3.308 V. These are meter captures, not full waveforms.</text>
+</svg>

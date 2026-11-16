@@ -1,0 +1,106 @@
+{
+  "status": "partial; measured nets with photo/datasheet-derived polarity and transistor roles",
+  "nets": {
+    "BAT+": [
+      "battery.B+",
+      "D1.K"
+    ],
+    "DIODE_COMMON_ANODE": [
+      "D1.A",
+      "D2.A"
+    ],
+    "SUPPLY_UPSTREAM": [
+      "D2.K",
+      "Q5.S2",
+      "R28.1"
+    ],
+    "PB12": [
+      "U2.24",
+      "Q5.G1",
+      "R28.2"
+    ],
+    "VMOTOR": [
+      "Q5.D3",
+      "U1.photo_top_middle"
+    ],
+    "M_RED": [
+      "U1.photo_top_left",
+      "J4.photo_upper",
+      "motor.red",
+      "R8.1",
+      "Q3.C3"
+    ],
+    "M_BLACK": [
+      "U1.photo_bottom_left",
+      "J4.photo_lower",
+      "motor.black",
+      "R4.1",
+      "Q2.C3"
+    ],
+    "MOTOR_SENSE": [
+      "R4.2",
+      "R8.2",
+      "U2.25"
+    ],
+    "PB14": [
+      "U2.26",
+      "U1.photo_bottom_right"
+    ],
+    "PB15": [
+      "U2.27",
+      "U1.photo_top_right"
+    ],
+    "Q2_CONTROL": [
+      "R9.2",
+      "Q2.B1"
+    ],
+    "PA15": [
+      "U2.39",
+      "R9.1"
+    ],
+    "Q3_CONTROL": [
+      "R10.2",
+      "Q3.B1"
+    ],
+    "PC10": [
+      "U2.40",
+      "R10.1"
+    ],
+    "GND": [
+      "U1.photo_bottom_middle",
+      "Q2.E2",
+      "Q3.E2",
+      "U2.31",
+      "C15.2"
+    ],
+    "VDD_AT_30": [
+      "U2.30",
+      "C15.1"
+    ],
+    "NRST": [
+      "U2.9",
+      "P12"
+    ],
+    "DIAG_TX": [
+      "U2.14",
+      "P16"
+    ]
+  },
+  "components": {
+    "R4": "91 kohm measured",
+    "R8": "91 kohm measured",
+    "R9": "1 kohm measured",
+    "R10": "1 kohm measured",
+    "R28": "4.635 Mohm in-circuit; gate-source pull-up",
+    "C15": "value unknown",
+    "D1": "cathode at photo-bottom / BAT+; exact diode type unknown",
+    "D2": "cathode at photo-left / Q5 source; exact diode type unknown",
+    "Q5": "2305-class P-channel MOSFET; G1 lower-left, S2 lower-right, D3 single upper; BLM2305 marking/pinout match, exact vendor unconfirmed",
+    "Q2/Q3": "J3Y / S8050-type NPN; B1 lower-left, E2 lower-right grounded, C3 single upper to motor lead; exact vendor unconfirmed",
+    "U1": "SA116L /443 marking; manufacturer pin numbering unassigned"
+  },
+  "datasheets": {
+    "Q5": "https://www.belling.com.cn/media/file_object/bel_product_en/BLM2305/datasheet/BLM2305_V2.3.pdf",
+    "Q2/Q3": "https://semiware.com/uploads/datasheet/S8050.pdf"
+  }
+}

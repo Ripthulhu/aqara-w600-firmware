@@ -49,7 +49,7 @@ the original radio. You do not need a local build or packaging tools.
 
 ## Development
 
-[Build and test](docs/build.md) · [Compatibility and limits](docs/status.md)
+[Build and test](docs/build.md) · [Hardware schematic and pin map](docs/hardware.md) · [Compatibility and limits](docs/status.md)
 
 Experimental firmware: keep SWD recovery available. Battery life and long-term
 reliability are not yet qualified. Never calibrate an unmounted head.
