@@ -23,7 +23,22 @@ uint8_t w600_buttons_poll(struct w600_buttons *buttons,uint32_t now,uint8_t pres
     for (unsigned i=0;i<3;++i) {
         struct w600_button *button=&buttons->input[i];
         bool pressed=(pressed_mask&(1u<<i))!=0;
-        if (button->raw!=pressed) { button->raw=pressed; button->changed_at=now; }
+        bool changed=button->raw!=pressed;
+        if (i && !button->raw && (uint32_t)(now-button->changed_at)>=5u)
+            button->released=true;
+        if (changed) { button->raw=pressed; button->changed_at=now; }
+        if (i) {
+            /* Dial contacts pulse briefly; debounce the interval, not pulse width. */
+            if (changed && pressed) {
+                if (button->released && (!button->fired ||
+                    (uint32_t)(now-button->pressed_at)>=30u)) {
+                    events|=(uint8_t)(W600_BUTTON_WAKE|(1u<<i));
+                    button->pressed_at=now; button->fired=1;
+                }
+                button->released=false;
+            }
+            continue;
+        }
         if (button->stable!=button->raw && (uint32_t)(now-button->changed_at)>=30u) {
             button->stable=button->raw; button->fired=false;
             if (button->stable) {

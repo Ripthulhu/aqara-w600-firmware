@@ -59,7 +59,7 @@ static void plateau_tests(void)
 }
 static void seat_tests(void)
 {
-    _Static_assert(sizeof(struct motor_seat)==32,"Keep motor-state layout unchanged");
+    _Static_assert(sizeof(struct motor_seat)==36,"Check motor-state layout");
     for(unsigned wrap=0;wrap<2;++wrap) {
         struct motor_seat s={0};uint32_t at=wrap ? UINT32_MAX-3000u : 0;
         for(unsigned i=0;i<100;i++,at+=200) assert(!motor_seat_observe(&s,at,1300));
@@ -117,6 +117,45 @@ static void seat_tests(void)
         }
     }
     puts("PASS closing seat: sustained valley/recovery, plateaus, short dips/recovery, spikes, gaps, duplicates, invalid and wrap");
+}
+static void return_band_tests(void)
+{
+    for(unsigned wrap=0;wrap<2;++wrap) {
+        struct motor_seat s={0};uint32_t at=wrap ? UINT32_MAX-10000u : 0;
+        for(unsigned i=0;i<10;++i) window(&s,&at,1390,1000);
+        for(unsigned i=0;i<25;++i) {
+            window(&s,&at,i%2 ? 1050 : 950,1000);
+            assert(motor_seat_loaded(&s)==(i==24));
+        }
+        assert(s.return_min_mv==950 && s.return_max_mv==1050 && s.plateau_mv==1000);
+        window(&s,&at,1051,1000);
+        assert(!motor_seat_loaded(&s) && s.plateau_count==1);
+        assert(s.return_min_mv==1051 && s.return_max_mv==1051);
+        for(unsigned i=0;i<24;++i) window(&s,&at,1051,1000);
+        assert(motor_seat_loaded(&s));
+        window(&s,&at,1101,1000);assert(!s.plateau_count);
+        for(unsigned i=0;i<24;++i) window(&s,&at,1000,1000);
+        assert(!motor_seat_loaded(&s));
+        window(&s,&at,1000,1000);assert(motor_seat_loaded(&s));
+        at+=400;window(&s,&at,1000,1000);
+        assert(!motor_seat_loaded(&s));
+
+        motor_seat_reset(&s);at=0;
+        for(unsigned i=0;i<10;++i) window(&s,&at,1390,1000);
+        for(unsigned i=0;i<41;++i) {
+            window(&s,&at,900+5*i,1000);
+            assert(!motor_seat_loaded(&s)); /* A sliding anchor would follow this drift. */
+        }
+        window(&s,&at,1101,1000);assert(!s.plateau_count);
+        for(unsigned i=0;i<100;++i) window(&s,&at,1101,1000);
+        assert(!motor_seat_loaded(&s));
+
+        motor_seat_reset(&s);at=0;
+        for(unsigned i=0;i<10;++i) window(&s,&at,1390,945);
+        for(unsigned i=0;i<30;++i) window(&s,&at,1040,945);
+        assert(!motor_seat_loaded(&s)); /* Absolute band alone cannot bypass ten percent. */
+    }
+    puts("PASS return load band: full-range dwell, range reset, wrong load, drift, gaps and wrap");
 }
 int main(int argc,char **argv)
 {
@@ -178,4 +217,5 @@ int main(int argc,char **argv)
     puts("PASS provisional slowdown: sustained drop, steady signals, transients, gaps, invalid input, wrap");
     seat_tests();
     plateau_tests();
+    return_band_tests();
 }

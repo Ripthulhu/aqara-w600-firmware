@@ -22,9 +22,11 @@ struct motor_seat {
     uint16_t trough_mv, plateau_mv;
     uint16_t count, below_count, recovery_count;
     bool have_sample, candidate;
+    uint16_t return_min_mv, return_max_mv;
 };
 void motor_seat_reset(struct motor_seat *);
 bool motor_seat_observe(struct motor_seat *,uint32_t at,uint32_t mv);
+/* Return means must match the original load and share one retained 100mV band. */
 bool motor_seat_return_observe(struct motor_seat *,uint32_t at,uint32_t mv,uint32_t expected_mv);
 /* Separate sustained-load candidate; calibration must back off and repeat it. */
 bool motor_seat_loaded(const struct motor_seat *);

@@ -378,12 +378,12 @@ def run(data,symbols,name,ota_layout):
         packet(m,base.Frame(0x71,2,bytes.fromhex('07000407d0')))
         wait_frame(m,lambda f:f.sequence==0x71 and f.kind==3)
         before_wake=len(m.display_wire)
-        m.direction_buttons=4;m.levels(service.PB)
+        m.direction_buttons=4;m.levels(service.PA)
         until(m,lambda:m.display_report()[5] in (2000,2050) and m.display_report()[2]==0 and
               bool(m.cpu.mem_read(symbols['display_awake'],1)[0]) and len(m.display_wire)>before_wake)
         wake_target=m.display_report()[5]
         wake_bytes=len(m.display_wire)-before_wake
-        m.direction_buttons=0;m.levels(service.PB)
+        m.direction_buttons=0;m.levels(service.PA)
         until(m,lambda:m.virtual_us>=1900000 and m.display_report()[2]==0)
     index,request=start(m)
     if name=='receive_valid':

@@ -39,7 +39,7 @@ def run(data,symbols,scenario):
         settled(m)
         assert bytes(m.display_wire[-7:])==bytes.fromhex('080404000018ff')
         m.pressed=False; m.levels(service.PB)
-        m.direction_buttons=4; m.levels(service.PB)
+        m.direction_buttons=4; m.levels(service.PA)
         app.until(m,lambda:m.display_report()[5]==2050)
         settled(m)
         assert bytes(m.display_wire[-7:])!=blank

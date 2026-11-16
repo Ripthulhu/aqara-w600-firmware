@@ -40,6 +40,11 @@ static void press(uint32_t now)
 int main(void)
 {
     _Static_assert(sizeof(struct w600_endpoint)==36,"Keep radio endpoint layout");
+    assert(button_inputs(UINT32_MAX,UINT32_MAX)==0);
+    assert(button_inputs(UINT32_MAX,UINT32_MAX^(1u<<1))==W600_BUTTON_DECREASE);
+    assert(button_inputs(UINT32_MAX^(1u<<2),UINT32_MAX)==W600_BUTTON_INCREASE);
+    assert(button_inputs(UINT32_MAX,UINT32_MAX^(1u<<8))==W600_BUTTON_PRIMARY);
+    assert(button_inputs(UINT32_MAX^(1u<<2),UINT32_MAX^(1u<<1))==6u);
     clear(); release(0); press(100); button_poll(3130,1);
     assert(radio.endpoint.child_locked && control_calls==1);
     radio.endpoint.control_enabled=true; radio.endpoint.known|=W600_KNOWN_TARGET;
@@ -115,10 +120,11 @@ int main(void)
     assert(!memcmp(&unchanged,&radio.endpoint,sizeof unchanged) && !calls && !target_calls);
     for (unsigned input=1;input<=4;input*=2) {
         clear(); release(0);
-        assert(!display_should_show(100,button_poll(100,(int)input)));
+        assert(display_should_show(100,button_poll(100,(int)input))==(input!=1));
         assert(display_should_show(130,button_poll(130,(int)input)));
-        assert(display_should_show(10129,button_poll(10129,(int)input)));
-        assert(!display_should_show(10130,button_poll(10130,(int)input)));
+        uint32_t wake=input==1 ? 130u : 100u;
+        assert(display_should_show(wake+9999,button_poll(wake+9999,(int)input)));
+        assert(!display_should_show(wake+10000,button_poll(wake+10000,(int)input)));
     }
     clear(); radio.endpoint=unchanged;
     radio.endpoint.target_raw=2150;

@@ -39,14 +39,26 @@ class ApplicationCore(service.ServiceCore):
         self.put(RCC+0x0c,0x30260)
         self.put(0x40022000,2)
 
+    def dial_bias_ready(self):
+        return (self.get(service.PA)&0x3000==0x1000 and
+                bool(self.get(service.PA+4)&0x40) and
+                self.get(service.PA+0x0c)&0x3000==0x2000 and
+                not self.get(service.PA+0x14)&0x40)
+
+    def boot(self):
+        super().boot()
+        if self.report()[2]==2:
+            assert self.dial_bias_ready(), "Missing PA6 open-drain LOW dial bias"
+
     def levels(self,port,mode=None):
         super().levels(port,mode)
         mode=self.get(port) if mode is None else mode
-        # Board buttons have external idle-high levels, not model RAM defaults.
-        for bank,pin,mask in ((service.PA,2,2),(service.PB,1,4)):
+        # Dial contacts can pull low only through their PA6 common return.
+        connected=self.dial_bias_ready()
+        for bank,pin,mask in ((service.PA,2,4),(service.PB,1,2)):
             if port==bank and (mode>>(2*pin))&3==0:
                 value=self.get(port+0x10)
-                value=value&~(1<<pin) if self.direction_buttons&mask else value|(1<<pin)
+                value=value&~(1<<pin) if connected and self.direction_buttons&mask else value|(1<<pin)
                 self.put(port+0x10,value)
 
     def code(self,cpu,address,size,user):
@@ -61,7 +73,7 @@ class ApplicationCore(service.ServiceCore):
                 self.rx.extend(base.encode(base.Frame(0x61,2,bytes.fromhex('0700040866'))))
             elif self.service_scenario=='idle_button_wake':
                 self.direction_buttons=4
-                self.levels(service.PB)
+                self.levels(service.PA)
             else: raise AssertionError(self.service_scenario)
         if address in (self.symbols.get("w600_motor_service_begin",-1),
                        self.symbols.get("w600_motor_service_begin_bounded",-1)):
@@ -190,15 +202,18 @@ def run(data,symbols,scenario):
             assert m.idle_sleep_count>before+200 and m.idle_sleep_us>=200000
         else:
             m.rx.extend(base.encode(base.Frame(0x60,2,bytes.fromhex('07000407d0'))))
-            until(m,lambda:m.report()[9]==1 and frames(m) is not None and m.get(service.PA+0x14)&(1<<11))
+            seed_ack=base.Frame(0x60,3,bytes.fromhex('000700'))
+            until(m,lambda:seed_ack in (frames(m) or []) and m.get(service.PA+0x14)&(1<<11))
+            before_replies=m.report()[9]
             m.idle_wake_armed=True
             if scenario=='idle_uart_wake':
-                until(m,lambda:m.report()[9]==2 and frames(m) is not None and m.get(service.PA+0x14)&(1<<11))
+                until(m,lambda:m.report()[9]>=before_replies+1 and
+                    base.Frame(0x61,3,bytes.fromhex('000700')) in (frames(m) or []) and m.get(service.PA+0x14)&(1<<11))
                 assert base.Frame(0x61,3,bytes.fromhex('000700')) in frames(m)
                 assert m.display_report()[5]==0x10000
             else:
                 until(m,lambda:m.display_report()[5]==2050)
-                assert 30000<=m.virtual_us-m.idle_wake_at<=33000, \
+                assert 0<=m.virtual_us-m.idle_wake_at<=3000, \
                     (m.virtual_us-m.idle_wake_at,m.display_report(),m.report())
                 until(m,lambda:m.display_report()[2]==0)
                 assert m.virtual_us-m.idle_wake_at<=50000

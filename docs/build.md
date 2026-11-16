@@ -27,7 +27,7 @@ downloadable dependency:
 export CIU32_SDK='/absolute/path/to/CIU32L071 EclipseExampleProject'
 python3 firmware/build.py \
   --flash-application \
-  --controller-revision 46 \
+  --controller-revision 50 \
   --development-link-only
 ```
 
@@ -56,7 +56,7 @@ as `W600-2848.ota`, then run:
 
 ```sh
 python3 tools/package_ota.py --stock W600-2848.ota \
-  --image w600-controller46.bin --revision 46 --output w600-custom46.ota
+  --image w600-controller50.bin --revision 50 --output w600-custom50.ota
 ```
 
 The packer checks the donor's pinned SHA-256 and keeps its radio payload

@@ -61,6 +61,13 @@ static bool ota_owned;
 static struct w600_buttons button;
 volatile struct app_report app_report __attribute__((section(".appreport"),used));
 static volatile uint32_t app_ticks;
+static uint8_t button_inputs(uint32_t a,uint32_t b)
+{
+    /* The dial pulses PB1/lead20 counterclockwise and PA2/lead13 clockwise. */
+    return (uint8_t)((!(b&(1u<<8)) ? W600_BUTTON_PRIMARY : 0) |
+        (!(b&(1u<<1)) ? W600_BUTTON_DECREASE : 0) |
+        (!(a&(1u<<2)) ? W600_BUTTON_INCREASE : 0));
+}
 #ifdef W600_DISPLAY_BENCH
 static uint32_t display_activity_at;
 static bool display_awake;
@@ -513,10 +520,15 @@ void w600_app_main(void)
     }
     display_publish();
 #endif
-    GPIOA->MODE&=~(3u<<4); GPIOA->PUPD&=~(3u<<4);
+    /* Stock dial input setup also enables PA6 as an open-drain low output. */
+    GPIOA->BR=1u<<6;
+    GPIOA->OTYPE|=1u<<6;
+    GPIOA->PUPD=(GPIOA->PUPD&~((3u<<12)|(3u<<4)))|(2u<<12);
+    GPIOA->MODE=(GPIOA->MODE&~((3u<<12)|(3u<<4)))|(1u<<12);
     GPIOB->MODE&=~((3u<<16)|(3u<<2));
     GPIOB->PUPD=(GPIOB->PUPD&~((3u<<16)|(3u<<2)))|(1u<<16);
-    if ((GPIOA->MODE&(3u<<4)) || (GPIOA->PUPD&(3u<<4)) ||
+    if ((GPIOA->MODE&((3u<<12)|(3u<<4)))!=(1u<<12) || !(GPIOA->OTYPE&(1u<<6)) ||
+        (GPIOA->PUPD&((3u<<12)|(3u<<4)))!=(2u<<12) || (GPIOA->ODR&(1u<<6)) ||
         (GPIOB->MODE&((3u<<16)|(3u<<2))) ||
         (GPIOB->PUPD&((3u<<16)|(3u<<2)))!=(1u<<16)) fatal(3,0);
     if (!w600_radio_init(&radio,0)) fatal(4,radio.error);
@@ -691,9 +703,7 @@ void w600_app_main(void)
         }
 #endif
         uint32_t inputs_b=GPIOB->IDR,inputs_a=GPIOA->IDR;
-        uint8_t pressed=(uint8_t)((!(inputs_b&(1u<<8)) ? W600_BUTTON_PRIMARY : 0) |
-            (!(inputs_a&(1u<<2)) ? W600_BUTTON_DECREASE : 0) |
-            (!(inputs_b&(1u<<1)) ? W600_BUTTON_INCREASE : 0));
+        uint8_t pressed=button_inputs(inputs_a,inputs_b);
         uint8_t button_events;
 #ifdef W600_OTA_RECEIVER
         if(ota_owned)button_events=0;

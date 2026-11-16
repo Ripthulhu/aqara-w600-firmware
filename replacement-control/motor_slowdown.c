@@ -59,7 +59,16 @@ static bool seat_observe(struct motor_seat *s,uint32_t at,uint32_t mv,uint32_t e
     bool load=expected_mv ? difference<=100u && difference*100u<=expected_mv*10u :
                            mean*100u<=s->baseline_mv*75u || (s->plateau_count && delta<=50u);
     if(load) {
-        if(!s->plateau_count || delta>50u) {s->plateau_mv=mean;s->plateau_count=1;}
+        if(expected_mv) {
+            /* A return band need not be centred on its first recovering window. */
+            uint32_t low=s->plateau_count && s->return_min_mv<mean ? s->return_min_mv : mean;
+            uint32_t high=s->plateau_count && s->return_max_mv>mean ? s->return_max_mv : mean;
+            if(!s->plateau_count || high-low>100u) {
+                low=high=mean;s->plateau_count=1;
+            } else if(s->plateau_count<25u) ++s->plateau_count;
+            s->return_min_mv=low;s->return_max_mv=high;
+            s->plateau_mv=(low+high)/2u;
+        } else if(!s->plateau_count || delta>50u) {s->plateau_mv=mean;s->plateau_count=1;}
         else if(s->plateau_count<25u) ++s->plateau_count;
     } else s->plateau_count=0;
     bool loaded=mean*100u<=s->baseline_mv*85u;

@@ -20,8 +20,9 @@ struct w600_buttons {
 
 /* Zero/init once. pressed_mask uses the three active-low input meanings above.
  * Returns WAKE, DECREASE, INCREASE, LOCK (3s) or PAIR (10s) events.
- * One event per debounced direction press; no guessed knob auto-repeat.
- * Poll at least every20ms while awake. Held-at-boot inputs must release first.
+ * Dial falling edges count immediately, with a 30ms minimum event interval and
+ * 5ms stable release before rearming; no auto-repeat. Main button debounce30ms.
+ * Poll every1ms to catch short dial pulses. Held-at-boot inputs must release first.
  * Clock rollback/half-range latches an error; never initializes pairing itself. */
 void w600_buttons_init(struct w600_buttons *);
 uint8_t w600_buttons_poll(struct w600_buttons *,uint32_t now,uint8_t pressed_mask);

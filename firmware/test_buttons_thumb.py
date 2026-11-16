@@ -44,8 +44,49 @@ def run(data,symbols,scenario):
     if scenario=='held_boot':
         m.direction_buttons=6
         m.pressed=True
-    m.boot();settle(m,80)
-    if scenario=='pairing':
+    m.boot()
+    if scenario=='bias':
+        assert m.dial_bias_ready()
+        m.direction_buttons=6
+        for address,mask,value in ((app.service.PA,0x3000,0x3000),
+                                   (app.service.PA+4,0x40,0),
+                                   (app.service.PA+0x0c,0x3000,0),
+                                   (app.service.PA+0x14,0x40,0x40)):
+            saved=m.get(address);m.put(address,(saved&~mask)|value)
+            m.levels(app.service.PA);m.levels(app.service.PB)
+            assert not m.dial_bias_ready()
+            assert m.get(app.service.PA+0x10)&4 and m.get(app.service.PB+0x10)&2
+            m.put(address,saved)
+        m.levels(app.service.PA);m.levels(app.service.PB)
+        assert not m.get(app.service.PA+0x10)&4 and not m.get(app.service.PB+0x10)&2
+        m.direction_buttons=0;m.levels(app.service.PA);m.levels(app.service.PB)
+        result=m.checks()
+        result.update(scenario=scenario,dial_bias_required=True,
+                      physical_buttons_tested=False,rf_delivery_tested=False)
+        return result
+    settle(m,80)
+    if scenario=='pulses':
+        command(m,0x61,'07000407d0070504076c07030000')
+        displayed(m,0x10000)
+        for index,duration in enumerate((1,5,15)):
+            press(m,4,duration)
+            m.levels(app.service.PA);m.levels(app.service.PB)
+            assert not m.get(app.service.PA+0x10)&(1<<2) # physical lead13: clockwise
+            assert m.get(app.service.PB+0x10)&(1<<1)
+            press(m,0)
+            displayed(m,2050)
+            app.until(m,lambda:len(target_reports(m))==2*index+1)
+            assert target_reports(m)[-1]==bytes.fromhex('0700040802')
+            press(m,2,duration)
+            m.levels(app.service.PA);m.levels(app.service.PB)
+            assert not m.get(app.service.PB+0x10)&(1<<1) # physical lead20: counterclockwise
+            assert m.get(app.service.PA+0x10)&(1<<2)
+            press(m,0)
+            displayed(m,2000)
+            app.until(m,lambda:len(target_reports(m))==2*index+2)
+            assert target_reports(m)[-1]==bytes.fromhex('07000407d0')
+        assert not m.report()[6] and not m.report()[7]
+    elif scenario=='pairing':
         press(m,1)
         while m.pending_tick:m.step()
         app.idle_ticks(m,10001)
@@ -71,10 +112,10 @@ def run(data,symbols,scenario):
             displayed(m,0x10000)
             press(m,0)
         else:
-            press(m,2,15);press(m,0)
+            press(m,1,15);press(m,0)
             assert target(m)==2000 and not target_reports(m)
             displayed(m,0x10000)
-        press(m,2)
+        press(m,2,15)
         displayed(m,1950)
         app.until(m,lambda:target_reports(m)==[bytes.fromhex('070004079e')])
         assert bytes(m.display_wire[-7:])==bytes.fromhex('08607d001118ff')
@@ -120,11 +161,11 @@ def main():
     path=directory/'buttons-thumb-results.json'
     previous=json.loads(path.read_text()) if path.exists() else {}
     cases=previous.get('cases',{}) if previous.get('bin_sha256')==manifest['bin_sha256'] and previous.get('model_sources')==sources else {}
-    for scenario in sys.argv[2:] or ('targets','held_boot','pairing'):
-        assert scenario in ('targets','held_boot','pairing')
+    for scenario in sys.argv[2:] or ('targets','held_boot','pairing','pulses','bias'):
+        assert scenario in ('targets','held_boot','pairing','pulses','bias')
         cases[scenario]=run(data,manifest['symbols'],scenario)
         print('PASS actual-linked buttons',scenario,flush=True)
-        path.write_text(json.dumps(dict(complete=set(cases)=={'targets','held_boot','pairing'},
+        path.write_text(json.dumps(dict(complete=set(cases)=={'targets','held_boot','pairing','pulses','bias'},
             bin_sha256=manifest['bin_sha256'],model_sources=sources,cases=cases,
             hardware_tested=False,cycle_accurate=False),indent=2)+'\n')
 
