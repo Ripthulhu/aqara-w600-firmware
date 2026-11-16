@@ -6,6 +6,12 @@ bootloader are not replaced.
 
 ## What it fixes
 
+- Uses the external room temperature for control, not just for display. Missing
+  or stale readings trigger a close command, not a switch to the internal sensor.
+- Keeps Off in charge: temperature reports and target refreshes cannot reopen a
+  valve that has been turned off.
+- Starts opening below the room target without waiting for a 2°C drop, responds
+  to small target changes, and requests full closure at or above the target.
 - Prevents endless motor runs with timeouts for every movement and calibration.
 - Checks end stops using motor feedback between drive pulses, sustained-load
   detection, and a back-off and return.
@@ -18,7 +24,15 @@ bootloader are not replaced.
 - Marks the valve position as unknown when calibration is lost. Requires the
   supplied Zigbee2MQTT converter.
 
-Room control uses a separate temperature sensor.
+The temperature-control changes address problems reported in the
+[W600 community issue thread](https://forum.aqara.com/t/w600-thermostat-collection-of-infos-and-open-issues/188010),
+including the [external-sensor control issue](https://forum.aqara.com/t/w600-external-sensor-does-not-control-valve-firmware-issue/341137).
+Room control requires a separate temperature sensor.
+
+This is not a claim of zero temperature overshoot: a hot radiator still releases
+heat after the valve closes. Aqara smart schedules, clock/DST problems, group
+behaviour and Matter/Thread support are not covered by these fixes. See
+[Compatibility and limits](docs/status.md).
 
 ## Install from stock
 

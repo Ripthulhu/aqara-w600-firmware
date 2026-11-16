@@ -20,3 +20,21 @@
 Battery runtime, long-term wear, exact physical opening percentage, and power-loss
 rollback remain unqualified. Keep SWD recovery available. This replaces the valve
 controller, not the radio or the boiler's own controls.
+
+## Temperature control
+
+The controller uses the external room reading supplied through Zigbee2MQTT.
+It does not silently fall back to the thermometer beside the radiator. A missing
+reading or one not updated for twelve minutes requests closure and reports a sensor
+problem. Keep the external-temperature updates running.
+
+Below target it uses a simple proportional rule, with a minimum 20% opening
+request; at or above target it requests closure. Small target changes are
+accepted. These rules are covered by software tests, and mounted opening and
+shutoff have been checked. They do not guarantee a particular room-temperature
+accuracy or eliminate overshoot: radiator flow is not proportional to the
+reported opening percentage, and stored heat remains after closure.
+
+The community reports also include Aqara smart-schedule, clock/DST, group and
+Matter/Thread problems. Those are not qualified fixes in this Zigbee firmware.
+The old Zigbee2MQTT 10% position-scaling issue was fixed upstream, not here.
