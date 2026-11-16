@@ -12,7 +12,9 @@ bootloader are not replaced.
   valve that has been turned off.
 - Starts opening below the room target without waiting for a 2°C drop, responds
   to small target changes, and requests full closure at or above the target.
-- Prevents endless motor runs with timeouts for every movement and calibration.
+- Fixes the stock motor/calibration hang that could keep the motor running and
+  leave the valve completely unresponsive. Every movement and calibration has
+  a timeout.
 - Checks end stops using motor feedback between drive pulses, sustained-load
   detection, and a back-off and return.
 - Starts off after a restart, without moving the motor automatically.
