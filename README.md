@@ -6,10 +6,8 @@ bootloader are not replaced.
 
 ## Fixes for stock firmware issues
 
-- Uses the external room temperature for control, not just for display. Missing
-  or stale readings trigger a close command, not a switch to the internal sensor.
-- Keeps Off in charge: temperature reports and target refreshes cannot reopen a
-  valve that has been turned off.
+- Uses the external room temperature for regulation.
+- Stays Off when Zigbee sends temperature readings or target updates.
 - Starts opening below the room target without waiting for a 2°C drop, responds
   to small target changes, and requests full closure at or above the target.
 - Fixes the stock motor/calibration hang that could keep the motor running and
@@ -42,4 +40,4 @@ the original radio. You do not need a local build or packaging tools.
 [Build and test](docs/build.md) · [Hardware schematic and pin map](docs/hardware.md) · [Compatibility and limits](docs/status.md)
 
 Experimental firmware: keep SWD recovery available. Battery life and long-term
-reliability are not yet qualified. Never calibrate an unmounted head.
+reliability are still unproven. Never calibrate an unmounted head.

@@ -3,21 +3,31 @@
 - **Hardware:** CIU32L071-based Aqara W600 (`lumi.airrtc.aeu005`), original
   bootloader and Zigbee radio 48.
 - **Starting firmware:** stock `0.0.0_2848`. Other hardware and stock versions
-  are not qualified.
-- **Control:** separate room-temperature input; starts off and needs a mounted
-  calibration before normal regulation. Install the reference-status converter
+  have not been tested.
+- **Control:** separate room-temperature input; needs a mounted calibration
+  after each restart before normal regulation. Saved mode and target settings
+  can be restored. Install the reference-status converter
   so unknown travel is not shown as an old valid position.
-- **OTA:** stock-to-custom installation has been verified. Controller46 and
-  later support successive custom updates. Controllers43–45 need one wired
-  update to enable this; they cannot install that repair over OTA themselves.
+- **OTA:** stock-to-custom installation has been tested. Custom controllers 46
+  and later support subsequent OTA updates. Our controllers 43–45 had an
+  update-check bug and need one wired update; Aqara's stock firmware is unaffected.
 - **Update trust:** OTA trusts the paired Zigbee network. Newer W600 images
   must retain OTA support and pass identity, size, vector, CRC and SHA256 checks.
   The hash detects corruption; updates are not cryptographically signed.
 - **Release quality:** experimental. Test coverage is listed in each release.
 
-Battery runtime, long-term wear, exact physical opening percentage, and power-loss
-rollback remain unqualified. Keep SWD recovery available. This replaces the valve
+Battery life, long-term wear, exact physical opening percentage, and power-loss
+rollback are still unproven. Keep SWD recovery available. This replaces the valve
 controller; the original radio is retained.
+
+## Known issues in this custom firmware
+
+- If external-temperature updates stop for about five days, the timer can wrap
+  and make the old reading appear fresh again. The valve can then request heat
+  from that stale reading. A software test reproduces this; it is not fixed yet.
+- A serial-link error during an active OTA transfer can freeze the controller
+  until power is cycled. The motor stops, but the expected automatic restart
+  does not happen. This is reproduced in the compiled-image model.
 
 ## Temperature control
 
@@ -33,7 +43,7 @@ shutoff have been checked. Room-temperature regulation still needs testing on
 more radiator types.
 
 The community reports also include Aqara smart-schedule, clock/DST, group and
-Matter/Thread problems. Those are not qualified fixes in this Zigbee firmware.
+Matter/Thread problems. This Zigbee firmware does not address those.
 The old Zigbee2MQTT 10% position-scaling issue was fixed upstream, not here.
 
 ## Motor and local controls

@@ -2,7 +2,7 @@
 
 Install the single converter file before updating the firmware.
 
-1. Download [w600_custom.mjs](https://github.com/Ripthulhu/aqara-w600-firmware/releases/download/controller44-alpha1/w600_custom.mjs).
+1. Download [w600_custom.mjs](https://github.com/Ripthulhu/aqara-w600-firmware/releases/download/controller50-alpha1/w600_custom.mjs).
 2. In Zigbee2MQTT, open **Settings → Dev console → External converters**.
 3. Add `w600_custom.mjs`, paste its contents, and save.
 

@@ -20,8 +20,7 @@ Use Linux with Python 3.11+, native GCC, and GNU Arm Embedded tools
 SDK separately**. Its project directory must contain `Drivers/CMSIS/Core/`
 and `Drivers/CMSIS/Device/ciu32l071.h`.
 
-Set the SDK path explicitly; the source's private-lab fallback is not a
-downloadable dependency:
+Set `CIU32_SDK` to the SDK project folder:
 
 ```sh
 export CIU32_SDK='/absolute/path/to/CIU32L071 EclipseExampleProject'
@@ -33,8 +32,8 @@ python3 firmware/build.py \
 
 Output is `firmware/build-application/replacement-core.bin`, an ELF, and a
 manifest containing hashes/test results. This command does **not** flash a head.
-`--development-link-only` leaves runtime qualification pending; its image is not
-an approved release. The full lab model run also needs `unicorn`, `pyelftools`,
+`--development-link-only` skips the full application tests; do not release its
+image. The full lab model run also needs `unicorn`, `pyelftools`,
 and recorded fixtures. Do not use bench-motor options on a mounted or unattended
 head.
 
