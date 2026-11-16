@@ -35,3 +35,12 @@ more radiator types.
 The community reports also include Aqara smart-schedule, clock/DST, group and
 Matter/Thread problems. Those are not qualified fixes in this Zigbee firmware.
 The old Zigbee2MQTT 10% position-scaling issue was fixed upstream, not here.
+
+## Motor and local controls
+
+End-stop detection uses feedback between motor pulses, sustained-load detection,
+and a back-off and return. A motor fault blocks movement but leaves dial
+adjustment available.
+
+Turning the dial or pressing the button lights the display for ten seconds.
+Routine Zigbee traffic does not wake it or extend that timeout.

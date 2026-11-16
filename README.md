@@ -4,7 +4,7 @@ Replacement controller firmware for the Aqara W600 (`lumi.airrtc.aeu005`) with
 the **CIU32L071** MCU. Uses Zigbee through the original radio; the radio and
 bootloader are not replaced.
 
-## What it fixes
+## Fixes for stock firmware issues
 
 - Uses the external room temperature for control, not just for display. Missing
   or stale readings trigger a close command, not a switch to the internal sensor.
@@ -15,16 +15,6 @@ bootloader are not replaced.
 - Fixes the stock motor/calibration hang that could keep the motor running and
   leave the valve completely unresponsive. Every movement and calibration has
   a timeout.
-- Checks end stops using motor feedback between drive pulses, sustained-load
-  detection, and a back-off and return.
-- Starts off after a restart, without moving the motor automatically.
-- Wakes the display when you turn the dial or press the button. Routine Zigbee
-  traffic leaves it dark and does not extend the ten-second timeout.
-- Keeps dial adjustment available when a motor fault blocks movement.
-- Recovers from failed firmware transfers instead of staying stuck in update mode.
-- Supports further OTA updates without hard-coding the next image (controller46+).
-- Marks the valve position as unknown when calibration is lost. Requires the
-  supplied Zigbee2MQTT converter.
 
 The temperature-control changes address problems reported in the
 [W600 community issue thread](https://forum.aqara.com/t/w600-thermostat-collection-of-infos-and-open-issues/188010),
