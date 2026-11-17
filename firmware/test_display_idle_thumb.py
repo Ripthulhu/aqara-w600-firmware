@@ -24,7 +24,7 @@ def run(data,symbols,scenario):
     settled(m)
     if scenario!='unknown':
         m.rx.extend(base.encode(base.Frame(0x60,2,bytes.fromhex('07000407d0'))))
-        app.until(m,lambda:m.report()[9]==1)
+        app.until(m,lambda:app.reply_count(m)==1)
         settled(m)
         assert m.display_report()[5]==0x10000 and len(m.display_wire)==7
     before=len(m.display_wire)
@@ -50,7 +50,7 @@ def run(data,symbols,scenario):
             app.until(m,lambda:m.display_report()[5]==2000)
             settled(m)
             assert bytes(m.display_wire[-7:])!=blank and m.report()[6]==0
-            assert m.report()[9]==1
+            assert app.reply_count(m)==1
             m.pressed=False; m.levels(service.PB)
         else:
             assert scenario=='target'

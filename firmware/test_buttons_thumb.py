@@ -19,9 +19,9 @@ def press(m,mask,milliseconds=50):
 
 
 def command(m,sequence,payload,kind=2):
-    count=m.report()[9]
+    count=app.reply_count(m)
     m.rx.extend(app.base.encode(app.base.Frame(sequence,kind,bytes.fromhex(payload))))
-    app.until(m,lambda:m.report()[9]==count+1 and app.frames(m) is not None and
+    app.until(m,lambda:app.reply_count(m)==count+1 and app.frames(m) is not None and
               m.get(app.service.PA+0x14)&(1<<11))
     return next(f for f in app.frames(m) if f.sequence==sequence and f.kind==(4 if kind==1 else 3))
 

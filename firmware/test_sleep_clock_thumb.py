@@ -103,7 +103,7 @@ def run(data,symbols,scenario):
         payload=bytes.fromhex('07000407d0') if scenario=='command' else bytes.fromhex('07090001')
         m.rx.extend(base.encode(base.Frame(0x60,2,payload)))
         if scenario=='command':
-            app.until(m,lambda:m.report()[9]==1 and app.frames(m) is not None and
+            app.until(m,lambda:app.reply_count(m)==1 and app.frames(m) is not None and
                       m.get(service.PA+0x14)&(1<<11))
             released(m)
             assert m.clock_report()[:2]==(0,0) and not m.timer_runs
@@ -125,7 +125,7 @@ def run(data,symbols,scenario):
         else:
             assert scenario=='rate_fault' and c[:4]==(6,6,0,0) and c[9]==0
             m.rx.extend(base.encode(base.Frame(0x60,2,bytes.fromhex('07000407d0'))))
-            app.until(m,lambda:m.report()[9]==1 and app.frames(m) is not None and
+            app.until(m,lambda:app.reply_count(m)==1 and app.frames(m) is not None and
                       m.get(service.PA+0x14)&(1<<11))
             assert m.report()[2:4]==(2,0) and not m.timer_runs
     result=m.checks()

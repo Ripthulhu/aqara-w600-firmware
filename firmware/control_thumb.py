@@ -51,32 +51,32 @@ def run(data,symbols,layout,scenario):
         bytes.fromhex("07000407d007050407bc070300")+bytes([1 if scenario in ("partial_then_off","source_change") else 0])
     m.rx.extend(base.encode(base.Frame(0x70,2,initial)))
     if scenario=="unknown_source":
-        app.until(m,lambda:m.report()[9]==1 and app.frames(m) is not None)
+        app.until(m,lambda:app.reply_count(m)==1 and app.frames(m) is not None)
         start=m.virtual_us
         app.until(m,lambda:m.virtual_us-start>=150000)
         assert m.cpu.mem_read(symbols["radio"]+layout[2],1)==b"\x02"
         assert not m.timer_runs and m.off()
         m.rx.extend(base.encode(base.Frame(0x71,2,bytes.fromhex("07040100"))))
-        app.until(m,lambda:m.report()[9]>=2 and app.frames(m) is not None and
+        app.until(m,lambda:app.reply_count(m)>=2 and app.frames(m) is not None and
             any(f.kind==5 and f.payload.endswith(bytes.fromhex("07040100")) for f in app.frames(m)))
         assert m.cpu.mem_read(symbols["radio"]+layout[2],1)==b"\x02"
         assert not m.timer_runs and m.off()
         m.rx.extend(base.encode(base.Frame(0x72,2,bytes.fromhex("07040101"))))
-        app.until(m,lambda:m.report()[9]>=3 and app.frames(m) is not None)
+        app.until(m,lambda:app.reply_count(m)>=3 and app.frames(m) is not None)
         assert m.cpu.mem_read(symbols["radio"]+layout[2],1)==b"\x02"
         assert not m.timer_runs and m.off()
         m.rx.extend(base.encode(base.Frame(0x73,2,bytes.fromhex("0705040834"))))
-        app.until(m,lambda:m.report()[9]>=4 and app.frames(m) is not None)
+        app.until(m,lambda:app.reply_count(m)>=4 and app.frames(m) is not None)
         assert not m.timer_runs and m.off()
     elif scenario=="off_owner":
-        app.until(m,lambda:m.report()[9]==1 and app.frames(m) is not None)
+        app.until(m,lambda:app.reply_count(m)==1 and app.frames(m) is not None)
         start=m.virtual_us
         app.until(m,lambda:m.virtual_us-start>=150000)
         assert not m.timer_runs and m.off()
         for count,source in enumerate((0,1,0),2):
             before=len(app.frames(m))
             m.rx.extend(base.encode(base.Frame(0x70+count,2,bytes.fromhex("070401")+bytes([source]))))
-            app.until(m,lambda:m.report()[9]>=count and app.frames(m) is not None and
+            app.until(m,lambda:app.reply_count(m)>=count and app.frames(m) is not None and
                 any(f.kind==5 and f.payload.endswith(bytes.fromhex("070401")+bytes([source]))
                     for f in app.frames(m)[before:]))
             assert not m.timer_runs and m.off()
@@ -111,7 +111,7 @@ def run(data,symbols,layout,scenario):
             assert m.cpu.mem_read(symbols["radio"]+layout[2],1)==b"\x02"
             assert any(f.kind==5 and f.payload.endswith(bytes.fromhex("07040100")) for f in app.frames(m))
             m.rx.extend(base.encode(base.Frame(0x74,2,bytes.fromhex("0705040834"))))
-            app.until(m,lambda:m.report()[9]>=5 and app.frames(m) is not None and
+            app.until(m,lambda:app.reply_count(m)>=5 and app.frames(m) is not None and
                 m.cpu.mem_read(symbols["radio"]+layout[2],1)==b"\x00")
             assert len(m.timer_runs)==2 and m.off()
     assert m.cpu.mem_read(symbols["radio"]+layout[2],1)==b"\x00"

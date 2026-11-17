@@ -15,13 +15,30 @@ import unittest
 
 HERE = Path(__file__).resolve().parent
 RUN_HASHES = {
-    "application_thumb.py": "3212262d1a3db2a2adf60939bbe466fd3d2f57343d9a2f0bb26c5cb5f4d738ed",
-    "test_continuous_home_thumb.py": "971571095304910ef102992e83d4885ecb31e78d21f32b76431f816ca310b93f",
-    "test_confirmation_fault_thumb.py": "83a15e30f3d74f8fefce860615cea5ee0c95749e2399a4b4d22dbfb50ecaff2a",
+    "application_thumb.py": "6e2892a1f588f7041c47baa149a387535be3f4172e0c2d5b28930986876f2377",
+    "test_continuous_home_thumb.py": "aa2aeaf330da46cb929d61b6bdbf77af6ad01f4866c48c7d9c1a6fe1acbff590",
+    "test_confirmation_fault_thumb.py": "3e50aed2024e97c5e608a6412e6af2813dad69725a1e7dfd32a4001247ba37ad",
 }
 
 
 class Dispatch(unittest.TestCase):
+    def test_reply_count_excludes_announcements_and_handles_partial_tail(self):
+        tree=ast.parse((HERE/'application_thumb.py').read_text())
+        nodes=[node for node in tree.body if isinstance(node,ast.FunctionDef) and
+               node.name in ('frames','reply_count')]
+        namespace={'base':SimpleNamespace(decode=lambda data:SimpleNamespace(kind=data[0]))}
+        exec(compile(ast.Module(body=nodes,type_ignores=[]),'application_thumb.py','exec'),namespace)
+        packet=lambda kind:bytes((kind,0,0,0,0,0,0,0,0,0))
+        m=SimpleNamespace(tx=packet(5)+packet(3)+packet(4)+packet(5)[:8])
+        self.assertIsNone(namespace['frames'](m))
+        self.assertEqual(namespace['reply_count'](m),2)
+        m.tx=packet(3)+packet(5)[:4]
+        self.assertEqual(namespace['reply_count'](m),1)
+        m.tx=packet(5)+packet(6)
+        self.assertEqual(namespace['reply_count'](m),0)
+        m.tx=b''
+        self.assertEqual(namespace['reply_count'](m),0)
+
     def test_run_bodies_are_byte_identical(self):
         for name, expected in RUN_HASHES.items():
             text = (HERE / name).read_text()

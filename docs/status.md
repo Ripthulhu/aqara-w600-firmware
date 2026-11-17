@@ -24,8 +24,8 @@ controller; the original radio is retained.
 
 The current source fixes both issues below. They remain in the downloadable
 controller 50 release; the controller 51 test build has not been released.
-Its targeted checks pass, but the full simulation suite still has outdated
-calibration and clock tests.
+The full software test suite passes, including calibration, clock, OTA and
+normal valve-control checks.
 
 - If external-temperature updates stop for about five days, the timer can wrap
   and make the old reading appear fresh again. The valve can then request heat

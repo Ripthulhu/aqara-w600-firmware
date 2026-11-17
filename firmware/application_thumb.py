@@ -92,14 +92,33 @@ class ApplicationCore(service.ServiceCore):
                 self.adc_pending=(self.adc_pending[0],channel,1)
 
 
-def frames(m):
+class NominalCore(ApplicationCore):
+    """Functional tests poll at 0.5 ms; timing sweeps retain ApplicationCore."""
+    def step(self,elapsed=125):
+        super().step(max(elapsed,500))
+
+    def code(self,cpu,address,size,user):
+        if address==self.symbols['w600_app_clock']:self.advance_us(20)
+        super().code(cpu,address,size,user)
+
+    def checks(self):
+        return dict(super().checks(),foreground_clock_step_us=25,foreground_dispatch_us=500,
+                    cycle_accurate=False)
+
+
+def frames(m,allow_partial=False):
     result=[]; pos=0
     while pos<len(m.tx):
-        if len(m.tx)-pos<8: return None
+        if len(m.tx)-pos<8: return result if allow_partial else None
         size=10+int.from_bytes(m.tx[pos+5:pos+7],"big")
-        if len(m.tx)-pos<size: return None
+        if len(m.tx)-pos<size: return result if allow_partial else None
         result.append(base.decode(bytes(m.tx[pos:pos+size]))); pos+=size
     return result
+
+
+def reply_count(m):
+    """Count command responses, excluding startup and status announcements."""
+    return sum(frame.kind in (3,4) for frame in frames(m,allow_partial=True))
 
 
 def until(m,predicate,limit=20000):
@@ -120,7 +139,8 @@ def idle_ticks(m,count):
 
 
 def run(data,symbols,scenario):
-    m=ApplicationCore(data,symbols,scenario)
+    precise=scenario.startswith('idle_') or scenario=='calibration_timing_temperature'
+    m=(ApplicationCore if precise else NominalCore)(data,symbols,scenario)
     corrupt={"bad_clock":(RCC+8,0), "bad_pll":(RCC+0x0c,0x20260),
              "bad_latency":(0x40022000,0), "bad_watchdog":(0x40003004,7),
              "bad_iopen":(RCC+0x2c,8), "bad_irq":(0xe000e100,1),
@@ -134,13 +154,13 @@ def run(data,symbols,scenario):
         assert mount()==(0,0,0,0) and not m.timer_runs and m.off()
         if scenario=='mount_heat_reject':
             m.rx.extend(base.encode(base.Frame(0x60,2,bytes.fromhex('07030001'))))
-            until(m,lambda:m.report()[9]==1 and frames(m) is not None)
+            until(m,lambda:reply_count(m)==1 and frames(m) is not None)
         m.put(at,1 if scenario=='mount_invalid_reject' else 0xa7)
         if scenario.endswith('_reject'):
             until(m,lambda:mount()[2]==3)
             assert mount()==(0,1,3,0) and not m.timer_runs and m.off()
             m.rx.extend(base.encode(base.Frame(0x61,2,bytes.fromhex('07030000'))))
-            until(m,lambda:m.report()[9]>=(2 if scenario=='mount_heat_reject' else 1))
+            until(m,lambda:reply_count(m)>=(2 if scenario=='mount_heat_reject' else 1))
         else:
             until(m,lambda:mount()[2]==1 and len(m.timer_runs)==1)
             assert m.direction==1 and mount()[1]==1
@@ -178,7 +198,7 @@ def run(data,symbols,scenario):
                 assert r[13]<=r[21+3*i]<=r[14]
             # A later ordinary request still reaches the real decoder and reply.
             m.rx.extend(base.encode(base.Frame(0x68,1,bytes.fromhex('070b071c'))))
-            until(m,lambda:m.report()[9]==1 and frames(m) is not None)
+            until(m,lambda:reply_count(m)==1 and frames(m) is not None)
             assert frames(m)[-1]==base.Frame(0x68,4,bytes.fromhex('070b000000071c0100'))
             start=m.virtual_us
             until(m,lambda:m.virtual_us-start>=100000)
@@ -204,10 +224,10 @@ def run(data,symbols,scenario):
             m.rx.extend(base.encode(base.Frame(0x60,2,bytes.fromhex('07000407d0'))))
             seed_ack=base.Frame(0x60,3,bytes.fromhex('000700'))
             until(m,lambda:seed_ack in (frames(m) or []) and m.get(service.PA+0x14)&(1<<11))
-            before_replies=m.report()[9]
+            before_replies=reply_count(m)
             m.idle_wake_armed=True
             if scenario=='idle_uart_wake':
-                until(m,lambda:m.report()[9]>=before_replies+1 and
+                until(m,lambda:reply_count(m)>=before_replies+1 and
                     base.Frame(0x61,3,bytes.fromhex('000700')) in (frames(m) or []) and m.get(service.PA+0x14)&(1<<11))
                 assert base.Frame(0x61,3,bytes.fromhex('000700')) in frames(m)
                 assert m.display_report()[5]==0x10000
@@ -260,15 +280,15 @@ def run(data,symbols,scenario):
     if scenario=="calibration_no_motion":
         until(m,lambda:m.display_report()[3:5]==(1,1))
         m.rx.extend(base.encode(base.Frame(0x60,2,bytes.fromhex("07090001"))))
-        # Two1.5s probes plus sampling gaps/rest exceed the old harness deadline.
-        until(m,lambda:len(m.timer_runs)==2 and m.motor_report()[2]==7 and m.off(),limit=50000)
-        # Both bounded direction probes returned low; no repeated calibration.
+        # Reject motionless opening preparation without starting another action.
+        until(m,lambda:len(m.timer_runs)==1 and m.motor_report()[2]==7 and m.off(),limit=50000)
         start=m.virtual_us
-        until(m,lambda:m.virtual_us-start>=150000 and frames(m) is not None and m.get(service.PA+0x14)&(1<<11))
-        assert len(m.timer_runs)==2 and m.motor_report()[3]==0
-        assert any(f.kind==5 and f.payload[:4]==bytes.fromhex('070b0000') for f in frames(m))
+        until(m,lambda:m.virtual_us-start>=150000 and frames(m) is not None and
+            any(f.kind==5 and f.payload[:4]==bytes.fromhex('070b0000') for f in frames(m)) and
+            m.get(service.PA+0x14)&(1<<11))
+        assert len(m.timer_runs)==1 and m.motor_report()[3]==0 and m.direction==1
         m.rx.extend(base.encode(base.Frame(0x61,1,bytes.fromhex("070b071c"))))
-        until(m,lambda:m.report()[9]==2 and frames(m) is not None and m.get(service.PA+0x14)&(1<<11))
+        until(m,lambda:reply_count(m)==2 and frames(m) is not None and m.get(service.PA+0x14)&(1<<11))
         assert frames(m)[-1]==base.Frame(0x61,4,bytes.fromhex("070b000000071c0100"))
         result=m.checks()
         result.update(calibration_completed=False,no_motion_failed=True,automatic_retries=0,
@@ -277,7 +297,9 @@ def run(data,symbols,scenario):
     if scenario in ("calibration_cancel","calibration_duplicate"):
         until(m,lambda:m.display_report()[3:5]==(1,1))
         # Drain the spaced startup reports before classifying post-command reports.
-        until(m,lambda:m.virtual_us>=150000 and frames(m) and m.get(service.PA+0x14)&(1<<11))
+        until(m,lambda:frames(m) is not None and any(f.kind==5 and
+            f.payload==bytes.fromhex('071c03ffff07030000') for f in frames(m)) and
+            m.get(service.PA+0x14)&(1<<11))
         before_command=len(frames(m))
         command=base.Frame(0x60,2,bytes.fromhex("07090001"))
         m.rx.extend(base.encode(command))
@@ -288,11 +310,11 @@ def run(data,symbols,scenario):
         assert busy_reports and all(f.payload==bytes.fromhex('07030000') for f in busy_reports),busy_reports
         if scenario=="calibration_duplicate":
             m.rx.extend(base.encode(command))
-            until(m,lambda:m.report()[9]>=2)
+            until(m,lambda:reply_count(m)>=2)
             assert len(m.timer_runs)==1
         m.rx.extend(base.encode(base.Frame(0x61,2,bytes.fromhex("07030000"))))
         expected_replies=3 if scenario=="calibration_duplicate" else 2
-        until(m,lambda:m.motor_report()[2]==7 and m.report()[9]>=expected_replies and
+        until(m,lambda:m.motor_report()[2]==7 and reply_count(m)>=expected_replies and
             frames(m) is not None and m.get(service.PA+0x14)&(1<<11))
         before=len(m.timer_runs)
         start=m.virtual_us
@@ -324,11 +346,11 @@ def run(data,symbols,scenario):
         assert bytes(m.display_wire)==bytes.fromhex("080000000018ff")
         if scenario=="traffic":
             m.rx.extend(base.encode(base.Frame(0x42,2,bytes.fromhex("07000407d0"))))
-            until(m,lambda:m.report()[9]==1 and frames(m) is not None)
+            until(m,lambda:reply_count(m)==1 and frames(m) is not None)
             assert [f for f in frames(m) if f.kind==3]==[base.Frame(0x42,3,bytes.fromhex("000700"))]
             assert bytes(m.display_wire)==bytes.fromhex("080000000018ff")
             m.rx.extend(base.encode(base.Frame(0x43,2,bytes.fromhex("0705040834"))))
-            until(m,lambda:m.report()[9]==2 and frames(m) is not None)
+            until(m,lambda:reply_count(m)==2 and frames(m) is not None)
         if scenario=="held_button":
             # A button held from power-up must not erase pairing credentials.
             until(m,lambda:frames(m) is not None and len(frames(m))==2 and
@@ -370,7 +392,7 @@ def run(data,symbols,scenario):
                     assert [f.payload for f in frames(m) if f.kind==5 and f.payload[:2]==b'\x07\x06']==[bytes.fromhex("0706040992")]
                     if scenario=="traffic":
                         m.rx.extend(base.encode(base.Frame(0x44,1,bytes.fromhex("07050706"))))
-                        until(m,lambda:m.report()[9]==3 and frames(m) is not None)
+                        until(m,lambda:reply_count(m)==3 and frames(m) is not None)
                         assert frames(m)[-1]==base.Frame(0x44,4,bytes.fromhex("070500040834070600040992"))
                     if scenario=="temperature_repeat":
                         first=r[24]

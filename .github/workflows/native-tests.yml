@@ -21,4 +21,5 @@ jobs:
       - run: python3 tools/test_package_ota.py
       - run: python3 tools/test_package_release.py
       - run: python3 tools/test_bundle_converter.py
+      - run: python3 firmware/test_model_dispatch.py
       - run: node --test zigbee2mqtt/test_w600_reference.mjs
