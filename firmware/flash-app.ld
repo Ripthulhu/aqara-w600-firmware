@@ -29,6 +29,7 @@ SECTIONS {
  __bss_size = SIZEOF(.bss);
  .probereport ORIGIN(PROBE) (NOLOAD) : { KEEP(*(.probereport)) } >PROBE
  .appreport ORIGIN(REPORT) (NOLOAD) : { KEEP(*(.appreport)) } >REPORT
+ .recovery (NOLOAD) : { KEEP(*(.recovery)) } >REPORT
  /DISCARD/ : { *(.comment) *(.note*) *(.ARM.exidx*) *(.ARM.extab*) }
 }
 ASSERT(ADDR(.vectors)==0x08002000 && SIZEOF(.vectors)==192,"Application vectors")
@@ -42,4 +43,5 @@ ASSERT(__data_load+__data_size<=__settings_page0 &&
        __settings_page1+512<=0x08010800,"Settings pages overlap code/staging")
 ASSERT(SIZEOF(.probereport)==128 && ADDR(.probereport)==0x20006980,"Motor report layout")
 ASSERT(SIZEOF(.appreport)==128,"Application report layout")
+ASSERT(ADDR(.recovery)==0x20006a80 && SIZEOF(.recovery)==8,"Recovery record layout")
 ASSERT((__stack_top&7)==0 && ORIGIN(REPORT)+LENGTH(REPORT)<=0x20006c00,"Stack reserve")

@@ -15,7 +15,7 @@ import unittest
 
 HERE = Path(__file__).resolve().parent
 RUN_HASHES = {
-    "application_thumb.py": "6e2892a1f588f7041c47baa149a387535be3f4172e0c2d5b28930986876f2377",
+    "application_thumb.py": "394c5d59322d43491fef9b7ee956063d5cf56753892eafb66c5521e457c03d86",
     "test_continuous_home_thumb.py": "aa2aeaf330da46cb929d61b6bdbf77af6ad01f4866c48c7d9c1a6fe1acbff590",
     "test_confirmation_fault_thumb.py": "3e50aed2024e97c5e608a6412e6af2813dad69725a1e7dfd32a4001247ba37ad",
 }

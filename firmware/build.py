@@ -18,6 +18,7 @@ parser.add_argument("--raw-probe-bench",action="store_true")
 parser.add_argument("--display-probe-bench",action="store_true")
 parser.add_argument("--motor-service-bench",action="store_true")
 parser.add_argument("--flash-application",action="store_true")
+parser.add_argument("--deep-sleep",action="store_true",help="Enable experimental STOP mode at boot (requires hardware wake checks)")
 parser.add_argument("--development-link-only",action="store_true",help="Compile/test/link a FLASH development image; leave runtime qualification pending")
 parser.add_argument("--controller-revision",type=int,default=46)
 parser.add_argument("--motor-direction",type=int,choices=(1,2),default=2)
@@ -26,6 +27,7 @@ flash=args.flash_application
 if not 1<=args.controller_revision<=65535:parser.error("Controller revision outside BE16 range")
 if flash and not 46<=args.controller_revision<=255:parser.error("OTA-enabled application revision must be46..255")
 if args.development_link_only and not flash:parser.error("Development link-only requires --flash-application")
+if args.deep_sleep and not flash:parser.error("Deep sleep requires --flash-application")
 service=args.motor_service_bench or flash
 if flash and (args.raw_probe_bench or args.display_probe_bench or args.motor_service_bench):
     parser.error("The persistent application is not an automatic bench motor run")
@@ -136,6 +138,7 @@ if display: flags.append("-DW600_DISPLAY_BENCH=1")
 if service: flags.append("-DW600_MOTOR_SERVICE=1")
 if args.motor_service_bench: flags += ["-DW600_MOTOR_SERVICE_BENCH=1","-DW600_MOTOR_DIRECTION="+str(args.motor_direction)]
 if flash: flags += ["-DW600_FLASH_APPLICATION=1","-DW600_OTA_RECEIVER=1"]
+if args.deep_sleep: flags += ["-DW600_DEEP_SLEEP=1"]
 flags += ["-DW600_CONTROLLER_REVISION="+str(args.controller_revision)]
 objects=[]
 for unit in units:
@@ -376,8 +379,8 @@ manifest={"kind":"persistent application development image, normal controls inco
           "display_probe_bench":args.display_probe_bench,
           "display_enabled":display,
           "screen_timeout_ms":10000 if display else None,
-          "idle_cpu_sleep_enabled":flash,"deep_sleep_enabled":False,
-          "deep_sleep_bench_path_linked":flash,"deep_sleep_bench_gate_default":0,
+          "idle_cpu_sleep_enabled":flash,"deep_sleep_enabled":args.deep_sleep,
+          "deep_sleep_bench_path_linked":flash,"deep_sleep_bench_gate_default":int(args.deep_sleep),
           "battery_runtime_validated":False,
           "internal_vbat_diagnostic_once_per_boot":flash,
           "battery_voltage_publication_enabled":False,
@@ -406,6 +409,9 @@ manifest={"kind":"persistent application development image, normal controls inco
           "stack_scope":"All emitted static frames on linked direct/cross-branch paths plus UART, SysTick and one fault exception; not silicon latency or corrupt-SP proof.",
           "sources":{str(p.relative_to(ROOT.parent)):hashlib.sha256(p.read_bytes()).hexdigest() for p in inputs},
           "device_header_sha256":hashlib.sha256((SDK/"Drivers/CMSIS/Device/ciu32l071.h").read_bytes()).hexdigest()}
+if args.deep_sleep:
+    wake_model=ROOT/"test_deep_sleep_thumb.py"
+    manifest['sources']['firmware/'+wake_model.name]=hashlib.sha256(wake_model.read_bytes()).hexdigest()
 (OUT/"manifest.json").write_text(json.dumps(manifest,indent=2)+"\n")
 if args.development_link_only:
     assert manifest['linked_service_model_pending'] is True
@@ -426,6 +432,8 @@ elif flash:
         ('settings_models','settings_thumb.py','settings-thumb-results.json',[]),
         ('display_idle_models','test_display_idle_thumb.py','display-idle-thumb-results.json',[]),
     ]
+    if args.deep_sleep:
+        models.append(('deep_sleep_models','test_deep_sleep_thumb.py','deep-sleep-thumb-results.json',[]))
     with ThreadPoolExecutor(max_workers=3) as pool:
         futures={pool.submit(subprocess.check_call,[sys.executable,str(ROOT/script),str(OUT),*extra]):
                  (key,result_file) for key,script,result_file,extra in models}

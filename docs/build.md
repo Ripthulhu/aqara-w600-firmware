@@ -37,6 +37,18 @@ image. The full lab model run also needs `unicorn`, `pyelftools`,
 and recorded fixtures. Do not use bench-motor options on a mounted or unattended
 head.
 
+Release 54 uses `--deep-sleep` to enter STOP once the display is off and the
+valve is idle. Local builds without the flag use light sleep. The full test
+run checks wake from the radio, both dial directions, the button, and the timer.
+Standby current and battery life have not been measured for this release.
+
+On a runtime radio or STOP fault, the controller verifies motor shutdown and
+requests one recovery reboot if flash is idle and outside OTA. It retains the
+fault code in SRAM and uses light sleep after that reboot. Position must be
+established again; the firmware does not start calibration on its own. A repeat
+fault remains stopped rather than rebooting again. The linked tests inject both
+fault classes and check that the recovered controller answers a radio command.
+
 ## Update authorization and packaging
 
 The **Package release OTA** workflow runs when a release is published. Create a

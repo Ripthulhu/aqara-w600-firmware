@@ -354,6 +354,10 @@ bool w600_radio_poll(struct w600_radio *r,uint32_t now)
             }
 #endif
             if(w600_endpoint_process(&r->endpoint,&r->request,&r->reply)) {
+                if(r->endpoint.mode_rejected) {
+                    r->endpoint.mode_rejected=false;
+                    r->control_pending=true;
+                }
                 if((r->endpoint.known&W600_KNOWN_TARGET) && r->endpoint.target_raw!=old_target) {
                     ++r->target_change_count; r->last_target_change_at=now;
                 }

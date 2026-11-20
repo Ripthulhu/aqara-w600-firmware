@@ -313,10 +313,16 @@ static void modes_ranges_and_aliases(void)
     struct w600_frame in=request(2,30,(uint8_t[]){7,0,4,8,0x98,7,5,4,7,0xd0},10);
     expect(&s,&in,3,(uint8_t[]){0,7,0,0,7,5},6);
     assert(!s.mode && !s.mode_known && s.external_updates==1);
+    in=request(2,31,(uint8_t[]){7,3,0,1,7,0x1d,1,2,7,5,4,7,0xd0},13);
+    uint32_t before=s.control_updates;
+    expect(&s,&in,3,(uint8_t[]){3,7,3,3,7,0x1d,0,7,5},9);
+    assert(!s.mode && s.mode_rejected && s.control_updates==before && s.external_updates==2);
+    s.mode_rejected=false;
+    s.calibrated=true;
     in=request(2,31,(uint8_t[]){7,3,0,1,7,0x1d,1,2},8);
     assert(w600_endpoint_process(&s,&in,&in));
     assert(in.kind==3 && in.length==6 && !memcmp(in.payload,(uint8_t[]){0,7,3,0,7,0x1d},6));
-    assert(s.mode==2 && s.mode_known);
+    assert(s.mode==2 && s.mode_known && !s.mode_rejected);
     in=request(1,32,(uint8_t[]){7,3,7,0x1d,7,0},6);
     assert(w600_endpoint_process(&s,&in,&in));
     assert(in.kind==4 && in.length==16 && !memcmp(in.payload,
@@ -333,7 +339,7 @@ static void modes_ranges_and_aliases(void)
     assert(!s.mode);
     in=request(2,36,(uint8_t[]){7,0,4,8,0x98,7,5,4,7,0xd0},10);
     expect(&s,&in,3,(uint8_t[]){0,7,0,0,7,5},6);
-    assert(!s.mode && s.external_updates==2); /* Same sensor value refreshes its age, never enables heat. */
+    assert(!s.mode && s.external_updates==3); /* Same sensor value refreshes its age, never enables heat. */
 }
 
 int main(void)

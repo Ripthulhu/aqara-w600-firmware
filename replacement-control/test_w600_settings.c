@@ -90,7 +90,7 @@ int main(void)
     s=(struct w600_settings){1,2100,7,1,1};struct w600_endpoint e=fresh();
     e.external_temp_raw=1234;e.local_temp_raw=567;
     assert(w600_settings_restore(&s,&e));
-    assert(e.target_raw==2100 && e.mode==1 && e.mode_known && e.external_use==1 &&
+    assert(e.target_raw==2100 && e.mode==0 && e.mode_known && e.external_use==1 &&
         e.known==(W600_KNOWN_TARGET|W600_KNOWN_EXTERNAL_USE) && !e.external_updates &&
         !e.external_temp_raw && !e.local_temp_raw &&
         !e.calibrated && !e.opening_known && !e.moving && !e.calibration_pending);

@@ -63,7 +63,7 @@ bool w600_settings_restore(const struct w600_settings *s,struct w600_endpoint *e
         e->control_updates || e->external_updates || e->control_error || e->calibration_error)return false;
     struct w600_endpoint next=*e;
     next.target_raw=s->target_raw;next.external_use=s->external_use;
-    next.mode=(s->fields&W600_SETTINGS_MODE) ? s->mode : 0;
+    /* The position reference is not saved, so neither mode is resumed from flash. */
     next.external_temp_raw=0;next.local_temp_raw=0;
     if (s->fields&W600_SETTINGS_TARGET)next.known|=W600_KNOWN_TARGET;
     if (s->fields&W600_SETTINGS_SOURCE)next.known|=W600_KNOWN_EXTERNAL_USE;

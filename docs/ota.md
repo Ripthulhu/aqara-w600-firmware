@@ -22,10 +22,13 @@ it when starting the update. Update one head at a time with stable power.
 
 After restart, request an update check and confirm the installed version matches
 the release. Transfer completion alone does not confirm installation.
+If the head still reports the old controller version after the update has
+finished and it is responding again, power-cycle it once and check again.
 
 ## 4. Calibrate
 
-Check that the head is Off after restart; it can restore a saved Heat setting.
+The head starts Off after restart and rejects Heat requests until calibration
+restores its position reference.
 Once mounted, wait at least two seconds after restart, then start calibration
 from Zigbee2MQTT. Allow up to six minutes.
 

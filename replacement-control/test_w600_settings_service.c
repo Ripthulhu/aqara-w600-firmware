@@ -43,7 +43,7 @@ int main(void)
     service=(struct w600_settings_service){0};
     endpoint=(struct w600_endpoint){.control_enabled=true,.mode_known=true};
     assert(w600_settings_service_init(&service,&io,&workspace,&endpoint));
-    assert(service.status==W600_SETTINGS_LOADED && endpoint.mode==1 && endpoint.target_raw==2300 &&
+    assert(service.status==W600_SETTINGS_LOADED && endpoint.mode==0 && endpoint.target_raw==2300 &&
         endpoint.external_use==1 && endpoint.known==(W600_KNOWN_TARGET|W600_KNOWN_EXTERNAL_USE) &&
         !endpoint.calibrated && !endpoint.opening_known && !endpoint.moving &&
         !endpoint.external_temp_raw && !endpoint.local_temp_raw);

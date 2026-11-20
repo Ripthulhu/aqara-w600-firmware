@@ -181,7 +181,7 @@ def run(data,symbols,name):
     assert m.state()['status']==0
     assert not m.timer_runs
     endpoint=bytes(m.cpu.mem_read(symbols['radio'],40))
-    assert endpoint[LAYOUT[8]]==5 and endpoint[LAYOUT[9]]==int(name=='restore_heat')
+    assert endpoint[LAYOUT[8]]==5 and endpoint[LAYOUT[9]]==0
     assert not any(endpoint[LAYOUT[i]] for i in (10,11,12))
     assert all(endpoint[LAYOUT[i]:LAYOUT[i]+2]==b'\0\0' for i in (13,14))
     if name in ('restore','restore_heat'):return m.checks()

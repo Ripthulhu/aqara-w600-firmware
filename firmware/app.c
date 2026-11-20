@@ -60,6 +60,11 @@ static bool ota_owned;
 #endif
 static struct w600_buttons button;
 volatile struct app_report app_report __attribute__((section(".appreport"),used));
+#ifdef W600_FLASH_APPLICATION
+/* Survives SYSRESETREQ, not a setting or a substitute for a position reference. */
+static volatile uint32_t recovery[2] __attribute__((section(".recovery"),used));
+#define W600_RECOVERY_MAGIC 0x57365243u
+#endif
 static volatile uint32_t app_ticks;
 static uint8_t button_inputs(uint32_t a,uint32_t b)
 {
@@ -169,9 +174,12 @@ static struct w600_app_time control_time;
 static struct w600_sleep_clock sleep_clock;
 static uint32_t sleep_clock_attempt_at;
 static bool sleep_clock_attempted;
-/* shortcut: bench-only until radio wake lead time and real STOP recovery pass. */
-volatile uint32_t w600_stop_bench_enable;
+#ifndef W600_DEEP_SLEEP
+#define W600_DEEP_SLEEP 0
+#endif
+volatile uint32_t w600_stop_bench_enable=W600_DEEP_SLEEP;
 static struct w600_stop_report stop_report;
+static uint32_t stop_dial_edges;
 static struct w600_vbat_adc vbat;
 static bool vbat_attempted;
 volatile uint32_t vbat_report[32];
@@ -444,6 +452,18 @@ static void fatal(uint32_t error,uint32_t radio_error)
     app_report.magic=0x57364150u; app_report.version=1;
     app_report.stage=0xe0; app_report.error=error;
     app_report.motor_disabled=stopped; app_report.radio_error=radio_error;
+#ifdef W600_FLASH_APPLICATION
+    if (stopped && (error==7u || error==16u || error==17u) &&
+        recovery[0]!=W600_RECOVERY_MAGIC && !(FLASH->SR&0x10000u)
+#ifdef W600_OTA_RECEIVER
+        && !ota_owned
+#endif
+    ) {
+        recovery[1]=error|(radio_error<<8);
+        recovery[0]=W600_RECOVERY_MAGIC;
+        NVIC_SystemReset();
+    }
+#endif
     __DSB();
     for (;;) __NOP();
 }
@@ -505,6 +525,9 @@ void w600_app_main(void)
     for (unsigned i=0;i<sizeof(app_report)/4;++i) words[i]=0;
     app_report.magic=0x57364150u; app_report.version=1;
     app_report.stage=1; app_report.motor_disabled=1;
+#ifdef W600_FLASH_APPLICATION
+    if (recovery[0]==W600_RECOVERY_MAGIC) w600_stop_bench_enable=0;
+#endif
     if (!w600_board_init(&board_status)) fatal(2,0);
 #ifdef W600_RAW_PROBE_BENCH
     if (!probe_power_init() || !motor_probe_init(&probe)) fatal(9,0);
@@ -703,6 +726,12 @@ void w600_app_main(void)
         }
 #endif
         uint32_t inputs_b=GPIOB->IDR,inputs_a=GPIOA->IDR;
+#ifdef W600_FLASH_APPLICATION
+        /* A dial pulse can end before the clocks are back. Debounce it once. */
+        inputs_a&=~(stop_dial_edges&(1u<<2));
+        inputs_b&=~(stop_dial_edges&(1u<<1));
+        stop_dial_edges=0;
+#endif
         uint8_t pressed=button_inputs(inputs_a,inputs_b);
         uint8_t button_events;
 #ifdef W600_OTA_RECEIVER
@@ -766,7 +795,7 @@ void w600_app_main(void)
 #ifdef W600_OTA_RECEIVER
             !ota_owned &&
 #endif
-            app_idle_ready() && sleep_clock.phase==W600_SC_OFF &&
+            recovery[0]!=W600_RECOVERY_MAGIC && app_idle_ready() && sleep_clock.phase==W600_SC_OFF &&
             (!sleep_clock_attempted || (uint32_t)(app_ticks-sleep_clock_attempt_at)>=1000u)) {
             sleep_clock_attempted=true; sleep_clock_attempt_at=app_ticks;
             (void)w600_sleep_clock_begin(&sleep_clock,&app_ticks);
@@ -776,11 +805,14 @@ void w600_app_main(void)
             !ota_owned &&
 #endif
             w600_stop_bench_enable==1u && app_idle_ready() && display_target==0x10000u &&
-            !pressed && (uint32_t)(app_ticks-display_activity_at)>=10000u) {
+            !pressed && (uint32_t)(app_ticks-display_activity_at)>=10000u &&
+            /* PA10 can go high again before the first UART byte arrives. */
+            (!stop_report.radio_wakes || (uint32_t)(app_ticks-stop_report.last_radio_at)>=50u)) {
             if (sleep_clock.phase==W600_SC_DONE)
                 (void)w600_sleep_clock_arm(&sleep_clock,&app_ticks);
             if (sleep_clock.phase==W600_SC_ARMED) {
                 enum w600_stop_result result=w600_stop_mode(&sleep_clock,&app_ticks,&stop_report);
+                stop_dial_edges=stop_report.wake_lines;
                 if (!w600_sleep_clock_cancel(&sleep_clock) || result==W600_STOP_FAILED) fatal(17,stop_report.error);
             }
         }

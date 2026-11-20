@@ -4,9 +4,9 @@
   bootloader and Zigbee radio 48.
 - **Starting firmware:** stock `0.0.0_2848`. Other hardware and stock versions
   have not been tested.
-- **Control:** separate room-temperature input; needs a mounted calibration
-  after each restart before normal regulation. Saved mode and target settings
-  can be restored. Install the reference-status converter
+- **Control:** separate room-temperature input. The head starts Off after a restart
+  and needs a mounted calibration before accepting Heat. Saved setpoints and
+  sensor selection are restored. Install the reference-status converter
   so unknown travel is not shown as an old valid position.
 - **OTA:** stock-to-custom installation has been tested. Custom controllers 46
   and later support subsequent OTA updates. Our controllers 43–45 had an
@@ -19,20 +19,6 @@
 Battery life, long-term wear, exact physical opening percentage, and power-loss
 rollback are still unproven. Keep SWD recovery available. This replaces the valve
 controller; the original radio is retained.
-
-## Known issues in this custom firmware
-
-The current source fixes both issues below. They remain in the downloadable
-controller 50 release; the controller 51 test build has not been released.
-The full software test suite passes, including calibration, clock, OTA and
-normal valve-control checks.
-
-- If external-temperature updates stop for about five days, the timer can wrap
-  and make the old reading appear fresh again. The valve can then request heat
-  from that stale reading.
-- A serial-link error during an active OTA transfer can freeze the controller
-  until power is cycled. The motor stops, but the expected automatic restart
-  does not happen.
 
 ## Temperature control
 

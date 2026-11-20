@@ -138,7 +138,7 @@ def run(data,symbols,scenario):
 if __name__=='__main__':
     out=Path(sys.argv[1]);manifest=json.loads((out/'manifest.json').read_text())
     data=(out/'replacement-core.bin').read_bytes()
-    assert manifest['slow_clock_rate_check_enabled'] and not manifest['deep_sleep_enabled']
+    assert manifest['slow_clock_rate_check_enabled']
     assert hashlib.sha256(data).hexdigest()==manifest['bin_sha256']
     cases={}
     expected={'healthy','retained_rcl','command','calibration','rate_fault'}

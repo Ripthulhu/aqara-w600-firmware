@@ -5,6 +5,9 @@ replaced; real firmware, peripheral model and handlers execute afterward.
 """
 import hashlib
 import json
+from concurrent.futures import ProcessPoolExecutor
+from itertools import repeat
+from multiprocessing import get_context
 from pathlib import Path
 import sys
 
@@ -41,6 +44,7 @@ def run(data,symbols,layout,scenario):
     assert m.call("motor_position_reference",position,20001 if quantized else 20000,
                   24003 if quantized else 24000,1000 if quantized else 0)==1
     m.cpu.mem_write(symbols["valve"]+layout[1],b"\x01")
+    app.until(m,lambda:m.cpu.mem_read(symbols["radio"]+13,2)==b"\x01\x01")
     if scenario=="unknown_source":
         app.until(m,lambda:m.report()[23]>=1 and m.report()[20]==6)
         known=m.cpu.mem_read(symbols["radio"]+4,1)[0]
@@ -128,10 +132,13 @@ def main():
         (__file__,api.__file__,app.__file__,service.__file__,service.display.__file__,
          service.probe.__file__,base.__file__)}
     results={}
-    for scenario in ("off_owner","partial_then_off","full_quantized","unknown_source","source_change"):
-        results[scenario]=run(data,manifest["symbols"],manifest["test_control_layout"],scenario)
-        print("PASS actual-linked normal valve control",scenario,flush=True)
-        (out/"control-thumb-results.json").write_text(json.dumps({"complete":len(results)==5,
-            "bin_sha256":manifest["bin_sha256"],"hardware_tested":False,
-            "model_sources":sources,"saved_reference_fixture":True,"cases":results},indent=2)+"\n")
+    scenarios=("off_owner","partial_then_off","full_quantized","unknown_source","source_change")
+    with ProcessPoolExecutor(max_workers=5,mp_context=get_context("spawn")) as pool:
+        for scenario,result in zip(scenarios,pool.map(run,repeat(data),repeat(manifest["symbols"]),
+                                                     repeat(manifest["test_control_layout"]),scenarios)):
+            results[scenario]=result
+            print("PASS actual-linked normal valve control",scenario,flush=True)
+            (out/"control-thumb-results.json").write_text(json.dumps({"complete":len(results)==5,
+                "bin_sha256":manifest["bin_sha256"],"hardware_tested":False,
+                "model_sources":sources,"saved_reference_fixture":True,"cases":results},indent=2)+"\n")
 if __name__=="__main__": main()

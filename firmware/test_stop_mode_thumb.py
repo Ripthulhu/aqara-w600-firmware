@@ -19,7 +19,7 @@ STATE,TICKS,REPORT,END=0x20005000,0x20005100,0x20005200,0x20008000
 LINES=(1<<1)|(1<<2)|(1<<8)|(1<<10)
 IRQS=(1<<5)|(1<<6)|(1<<7)|(1<<30)
 CASES=('timer_match','timer_masked','timer_wrap','radio','primary','decrease','increase',
-       'pending_wfi','pll_failure','switch_failure','already_low','rx_pending')
+       'pending_wfi','pll_failure','switch_failure','already_low','rx_pending','radio_during_setup')
 
 
 def run(data,symbols,case):
@@ -41,7 +41,9 @@ def run(data,symbols,case):
         EXTI+4:0x10004,EXTI+0x70:initial_imr,EXTI+0x74:0x20000,TICKS:100}.items():put(a,v)
     state=[7,0,3,0,0,0,0,0,0,32000,2,0,0,1,TICKS]
     cpu.mem_write(STATE,struct.pack('<15I',*state))
-    if case=='already_low':put(PA+0x10,get(PA+0x10)&~(1<<10))
+    if case=='already_low':
+        put(PA+0x10,get(PA+0x10)&~(1<<10))
+        put(REPORT+12,1<<2) # Stale dial edge must not be replayed on a skipped sleep.
     if case=='rx_pending':put(UART+0x1c,get(UART+0x1c)|0x20)
     pending=[];writes=[];waits=0;elapsed=0;instructions=0;lowest=0x20007000
 
@@ -58,6 +60,8 @@ def run(data,symbols,case):
         if a==NVIC:pending.append((a,get(a)|value))
         elif a==NVIC+0x80:pending.append((NVIC,get(NVIC)&~value))
         elif a==NVIC+0x180:pending.append((NVIC+0x100,get(NVIC+0x100)&~value))
+        elif a==EXTI+0x70 and case=='radio_during_setup' and value&LINES:
+            pending.extend(((EXTI+8,1<<10),(NVIC+0x100,1<<7)))
         elif a==EXTI+8:
             assert not value&~0x3ffff,'reserved EXTI pending bit write'
             pending.append((a,get(a)&~value))
@@ -94,7 +98,7 @@ def run(data,symbols,case):
         else:
             put(LP+0x1c,360);elapsed=320
             if case in ('radio','primary','decrease','increase'):
-                bank,pin,irq={'radio':(PA,10,7),'primary':(PB,8,7),'decrease':(PA,2,6),'increase':(PB,1,5)}[case]
+                bank,pin,irq={'radio':(PA,10,7),'primary':(PB,8,7),'decrease':(PB,1,5),'increase':(PA,2,6)}[case]
                 put(bank+0x10,get(bank+0x10)&~(1<<pin));put(EXTI+8,1<<pin);put(NVIC+0x100,1<<irq)
         cpu.reg_write(UC_ARM_REG_PC,(a+2)|1)
 
@@ -115,7 +119,10 @@ def run(data,symbols,case):
     assert get(EXTI+0x74)==0x20000 and not get(LP+8) and get(RCC+0x34)==0x40060000
     assert cpu.reg_read(UC_ARM_REG_PRIMASK)==1 and get(LP+0x10)==1
     if case in ('already_low','rx_pending'):
-        assert result==0 and not waits and not writes and get(TICKS)==100 and get(ST)==7
+        assert result==0 and not waits and not writes and not report[3] and get(TICKS)==100 and get(ST)==7
+    elif case=='radio_during_setup':
+        assert result==0 and not waits and report[:5]==(0,0,0,1<<10,0)
+        assert report[5:]==(1,0,0,100) and get(TICKS)==100 and get(ST)==7
     elif case in ('pll_failure','switch_failure'):
         assert result==2 and waits==1 and report[2]==4 and get(TICKS)==100 and not get(ST)
     else:
@@ -127,7 +134,7 @@ def run(data,symbols,case):
         assert report[5:8]==(int(case=='radio'),int(case in ('primary','decrease','increase')),
                               int(case in ('timer_match','timer_masked','timer_wrap')))
         assert report[8]==(expected if case=='radio' else 0)
-    if result!=1:assert report[5:]==(0,0,0,0)
+    if result!=1 and case!='radio_during_setup':assert report[5:]==(0,0,0,0)
     return dict(result=result,report=report,ticks=get(TICKS),instructions=instructions,
                 lowest_sp=lowest,hardware_tested=False)
 

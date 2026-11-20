@@ -29,6 +29,8 @@ SCENARIOS=("startup_mode", "temperature_repeat", "held_button",
 
 
 class ApplicationCore(service.ServiceCore):
+    model_deep_stop=False
+
     def __init__(self,data,symbols,scenario):
         self.direction_buttons=0
         self.idle_wake_armed=False
@@ -49,6 +51,9 @@ class ApplicationCore(service.ServiceCore):
         super().boot()
         if self.report()[2]==2:
             assert self.dial_bias_ready(), "Missing PA6 open-drain LOW dial bias"
+            if not self.model_deep_stop:
+                # The separate STOP model provides wake edges and clock gating.
+                self.put(self.symbols['w600_stop_bench_enable'],0)
 
     def levels(self,port,mode=None):
         super().levels(port,mode)
@@ -153,14 +158,13 @@ def run(data,symbols,scenario):
         until(m,lambda:m.virtual_us>=250000)
         assert mount()==(0,0,0,0) and not m.timer_runs and m.off()
         if scenario=='mount_heat_reject':
-            m.rx.extend(base.encode(base.Frame(0x60,2,bytes.fromhex('07030001'))))
-            until(m,lambda:reply_count(m)==1 and frames(m) is not None)
+            m.cpu.mem_write(symbols['radio']+30,b'\x01')  # Out-of-policy state; exercise the mount guard.
         m.put(at,1 if scenario=='mount_invalid_reject' else 0xa7)
         if scenario.endswith('_reject'):
             until(m,lambda:mount()[2]==3)
             assert mount()==(0,1,3,0) and not m.timer_runs and m.off()
             m.rx.extend(base.encode(base.Frame(0x61,2,bytes.fromhex('07030000'))))
-            until(m,lambda:reply_count(m)>=(2 if scenario=='mount_heat_reject' else 1))
+            until(m,lambda:reply_count(m)>=1)
         else:
             until(m,lambda:mount()[2]==1 and len(m.timer_runs)==1)
             assert m.direction==1 and mount()[1]==1
@@ -247,13 +251,17 @@ def run(data,symbols,scenario):
             return [f for f in (frames(m) or []) if f.kind==5 and b'\x07\x03' in f.payload]
         until(m,lambda:mode_reports() and m.get(service.PA+0x14)&(1<<11))
         assert mode_reports()[-1].payload==bytes.fromhex('071c03ffff07030000')
-        for sequence,value in ((0x60,1),(0x61,0)):
+        for sequence,request,rejected in ((0x60,'07030001','030703'),(0x61,'071d0102','03071d')):
             before=len(mode_reports())
-            m.rx.extend(base.encode(base.Frame(sequence,2,bytes.fromhex('070300')+bytes([value]))))
+            m.rx.extend(base.encode(base.Frame(sequence,2,bytes.fromhex(request))))
             until(m,lambda:len(mode_reports())>before and m.get(service.PA+0x14)&(1<<11))
-            assert mode_reports()[-1].payload==bytes.fromhex('071c03ffff070300')+bytes([value])
+            assert base.Frame(sequence,3,bytes.fromhex(rejected)) in frames(m)
+            assert mode_reports()[-1].payload==bytes.fromhex('071c03ffff07030000')
+        off=base.Frame(0x62,3,bytes.fromhex('000703'))
+        m.rx.extend(base.encode(base.Frame(0x62,2,bytes.fromhex('07030000'))))
+        until(m,lambda:off in (frames(m) or []))
         assert not m.timer_runs and m.off() and m.motor_report()[2:5]==(0,0,1)
-        result=m.checks();result.update(startup_off_reported=True,mode_changes_reported_without_motion=True,
+        result=m.checks();result.update(startup_off_reported=True,heat_replay_rejected=True,
             target_or_position_invented=False,calibration_proven=False,startup_false_failure_omitted=True,
             startup_reference_unknown_reported=True)
         return result

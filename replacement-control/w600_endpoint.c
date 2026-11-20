@@ -91,6 +91,10 @@ static uint8_t write_field(struct w600_endpoint *state, uint16_t id,
     case 0x071d:
         if (type != (id == 0x0703 ? 0 : 1) || value[0] > (id == 0x0703 ? 1 : 2) ||
             (!state->control_enabled && value[0])) return 3;
+        if (value[0] && !state->calibrated) {
+            state->mode_rejected=true;
+            return 3;
+        }
         if (state->control_enabled && (!state->mode_known || state->mode!=value[0])) ++state->control_updates;
         state->mode=value[0];
         if (state->control_enabled) state->mode_known=true;

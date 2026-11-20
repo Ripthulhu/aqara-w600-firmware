@@ -59,6 +59,7 @@ enum w600_stop_result w600_stop_mode(struct w600_sleep_clock *s,volatile uint32_
                                      struct w600_stop_report *report)
 {
     if (!s || !ticks || !report || report->error) return W600_STOP_SKIPPED;
+    report->wake_lines=0;
     if (__get_PRIMASK()!=1 || __get_IPSR() || __get_CONTROL() || RD(SCB->SCR) ||
         RD(NVIC->ISER[0])!=UART_IRQ || RD(NVIC->ISPR[0]) ||
         RD(SCB->ICSR)&(SCB_ICSR_PENDSTSET_Msk|SCB_ICSR_PENDSVSET_Msk|SCB_ICSR_NMIPENDSET_Msk) ||
@@ -125,9 +126,9 @@ enum w600_stop_result w600_stop_mode(struct w600_sleep_clock *s,volatile uint32_
             if (elapsed>s->hz) { report->error=5;ok=false; }
         }
     }
-    report->wake_lines=(RD(EXTI->PIR)&GPIO_LINES)|((RD(LPTIM2->ISR)&2u) ? TIMER_LINE : 0u);
     WR(LPTIM2->IER,0);
     WR(EXTI->IMR,imr);
+    report->wake_lines=(RD(EXTI->PIR)&GPIO_LINES)|((RD(LPTIM2->ISR)&2u) ? TIMER_LINE : 0u);
     WR(EXTI->PIR,GPIO_LINES);
     WR(LPTIM2->ICR,LPTIM_ICR_ARRM_CF);
     WR(NVIC->ICER[0],WAKE_IRQS);
@@ -144,10 +145,10 @@ enum w600_stop_result w600_stop_mode(struct w600_sleep_clock *s,volatile uint32_
         if (!w600_app_resume(ticks,&before,elapsed,s->hz)) { report->error=7; return W600_STOP_FAILED; }
     }
     if (!ok) return W600_STOP_FAILED;
+    /* Also hold awake if PA10 interrupted setup and prevented STOP entry. */
+    if (report->wake_lines&(1u<<10)) { ++report->radio_wakes; report->last_radio_at=*ticks; }
     if (entered) {
         ++report->woke; report->elapsed=elapsed;
-        /* Keep radio evidence when a later timer wake replaces wake_lines. */
-        if (report->wake_lines&(1u<<10)) { ++report->radio_wakes; report->last_radio_at=*ticks; }
         if (report->wake_lines&((1u<<1)|(1u<<2)|(1u<<8))) ++report->button_wakes;
         if (report->wake_lines&TIMER_LINE) ++report->timer_wakes;
         return W600_STOP_WOKE;

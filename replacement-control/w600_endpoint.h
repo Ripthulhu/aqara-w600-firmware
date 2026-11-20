@@ -33,7 +33,7 @@ struct w600_endpoint {
     uint16_t requested_opening;
     uint8_t mode, control_error;
     bool moving, mode_known;
-    bool child_locked;
+    bool child_locked, mode_rejected;
 };
 
 void w600_endpoint_init(struct w600_endpoint *state);
